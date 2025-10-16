@@ -1,8 +1,9 @@
-import React from "react";
+import React, {useState} from "react";
 import SectionTitle from "../components/SectionTitle";
-import InventoryManagementOverview from "../components/InventoryManagementOverview";
-import LowStockAlert from "../components/LowStockAlert";
+import InventoryManagementOverview from "../components/inventoryManagement/InventoryManagementOverview";
+import LowStockAlert from "../components/inventoryManagement/LowStockAlert";
 import DataGridTable from "../components/DataGridTable";
+import AddProductModal from "../components/inventoryManagement/AddProductModal";
 
 const InventoryManagement = () => {
   const columns = [
@@ -20,6 +21,7 @@ const InventoryManagement = () => {
   ];
 
   const paginationModel = { page: 0, pageSize: 5 };
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <div className="flex-1 w-full px-0">
@@ -36,6 +38,7 @@ const InventoryManagement = () => {
 
         <button
           className="w-1/3 bg-blue-600 text-white font-medium px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
+          onClick={() => setShowModal(true)}
         >
           + Add Product
         </button>
@@ -44,6 +47,9 @@ const InventoryManagement = () => {
       <div className="px-6 mt-6">
         <DataGridTable rows={rows} columns={columns}/>
       </div>
+
+      <AddProductModal isOpen={showModal} onClose={() => setShowModal(false)} />
+
     </div>
   );
 };
