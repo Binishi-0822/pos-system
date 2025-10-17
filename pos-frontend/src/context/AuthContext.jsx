@@ -1,5 +1,6 @@
 import React, {useContext, useState, useEffect, createContext} from 'react'
 import axios from 'axios';
+import { verifyToken } from '../services/authService';
 
 const userContext = createContext()
 
@@ -13,14 +14,7 @@ const AuthContext = ({children}) => {
             try{
                 const token = localStorage.getItem('token')
                 if(token){
-                    const response = await axios.get(
-                        "http://localhost:3000/api/auth/verify",
-                        {
-                            headers: {
-                                "Authorization": `Bearer ${token}`
-                            }
-                        }
-                    )
+                    const response = await verifyToken(token);
                     console.log("response ",response)
                     if(response.data.success){
                         setUser(response.data.user)
