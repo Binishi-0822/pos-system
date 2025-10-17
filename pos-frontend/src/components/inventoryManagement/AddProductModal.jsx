@@ -30,7 +30,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
       console.error(error);
       alert("Failed to add product!");
     } finally {
-      setSubmitting(false); // <--- Tell Formik we're done
+      setSubmitting(false);
     }
   };
 
