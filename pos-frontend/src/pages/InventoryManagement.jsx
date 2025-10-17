@@ -10,33 +10,55 @@ const InventoryManagement = () => {
   const paginationModel = { page: 0, pageSize: 5 };
   const [showModal, setShowModal] = useState(false);
   const [rowData, setRowData] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "name", headerName: "Product Name", flex: 1 },
     { field: "category", headerName: "Category", flex: 1 },
     { field: "minStock", headerName: "Min Stock", flex: 1 },
-    { field: "status", headerName: "Status", flex: 1 },
-    { field: "action", headerName: "Action", flex: 0.8 },
-  ];
+    {
+      field: "status",
+      headerName: "Status",
+      flex: 1,
+      renderCell: (params) => {
+        const status = params.row.status;
+        let bgColor = "";
+        let textColor = "";
+        let borderColor = "";
 
-  const rows = [
-    {
-      id: 1,
-      productName: "Soap",
-      category: "Personal Care",
-      minStock: 10,
-      status: "Low",
-      action: "Edit",
+        switch (status) {
+          case "In Stock":
+            bgColor = "bg-green-50";
+            textColor = "text-green-700";
+            borderColor = "border-green-400";
+            break;
+          case "Low Stock":
+            bgColor = "bg-yellow-50";
+            textColor = "text-yellow-700";
+            borderColor = "border-yellow-400";
+            break;
+          case "Out of Stock":
+            bgColor = "bg-red-50";
+            textColor = "text-red-700";
+            borderColor = "border-red-400";
+            break;
+          default:
+            bgColor = "bg-gray-50";
+            textColor = "text-gray-700";
+            borderColor = "border-gray-300";
+        }
+        return (
+          <span
+            className={`px-3 py-1 rounded-full text-xs font-medium border ${bgColor} ${textColor} ${borderColor}`}
+          >
+            {status}
+          </span>
+        );
+      },
     },
-    {
-      id: 2,
-      productName: "Rice",
-      category: "Food",
-      minStock: 30,
-      status: "OK",
-      action: "Edit",
-    },
+
+    { field: "action", headerName: "Action", flex: 0.8 },
   ];
 
   useEffect(() => {
@@ -72,6 +94,17 @@ const InventoryManagement = () => {
     getRowData();
   }, []);
 
+  const filteredRows =
+    searchTerm.trim() === ""
+      ? rowData
+      : rowData.filter((row) => {
+          const lowerSearch = searchTerm.toLowerCase();
+          return (
+            row.name.toLowerCase().includes(lowerSearch) ||
+            row.category.toLowerCase().includes(lowerSearch)
+          );
+        });
+
   return (
     <div className="flex-1 w-full px-0">
       <SectionTitle title="Inventory Management" icon="📦" />
@@ -83,6 +116,8 @@ const InventoryManagement = () => {
           type="text"
           placeholder="Search products by name..."
           className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-200 transition duration-200"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
 
         <button
@@ -94,7 +129,11 @@ const InventoryManagement = () => {
       </div>
 
       <div className="px-6 mt-6">
-        <DataGridTable rows={rowData} columns={columns} />
+        <DataGridTable
+          rows={filteredRows}
+          columns={columns}
+          isSearch={searchTerm.trim() !== ""}
+        />
       </div>
 
       <AddProductModal isOpen={showModal} onClose={() => setShowModal(false)} />
