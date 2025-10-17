@@ -36,3 +36,26 @@ export const addProduct = async (req, res) => {
     res.status(500).json({ message: "Server error", error });
   }
 };
+
+
+export const getAllProducts = async (req, res) => {
+  try {
+    const products = await Product.find()
+      .populate("categoryId", "name")
+      .populate("unitId", "symbol")
+      .sort({ createdAt: -1 }); 
+
+    if (!products || products.length === 0) {
+      return res.status(404).json({ message: "No products found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Products fetched successfully",
+      data: products,
+    });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+};
