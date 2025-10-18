@@ -2,28 +2,47 @@ import React, { useState, useEffect } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import { addProductValidationSchema } from "../../validation/addProductValidation";
 import { getCategories, getMeasurements } from "../../services/metaService";
-import { addProduct } from "../../services/productService";
+import { addProduct, updateProduct } from "../../services/productService";
+import Alert from "@mui/material/Alert";
 
-const AddProductModal = ({ isOpen, onClose }) => {
+
+const AddProductModal = ({ isOpen, onClose, data, isEditMode }) => {
   if (!isOpen) return null; // Hide modal when not open
 
   const initialValues = {
-    name: "",
-    category: "",
-    unit: "",
-    minStock: "",
+    name: data?.name || "",
+    brand: data?.brand || "",
+    category: data?.categoryId || "",
+    unit: data?.unitId || "",
+    minStock: data?.minStock || "",
   };
+
 
   const handleSubmit = async (values, { resetForm, setSubmitting }) => {
     try {
     console.log("handle submit",values)
-      const result = await addProduct(values);
-      if (result?.product._id) {
-        alert("Product added successfully!");
-      } else {
-        alert("Failed to add product!");
-      }
+      if(isEditMode){
+        const updatedValue = {
+          ...values,
+          _id: data._id
+        }
+        const result = await updateProduct(updatedValue);
 
+        if (result?.product._id) {
+          <Alert severity="success">Product updated successfully!</Alert>
+        } else {
+          <Alert severity="error">Failed to update product.</Alert>
+        }
+
+      }else{
+        const result = await addProduct(values);
+        if (result?.product._id) {
+          <Alert severity="success">Product added successfully!</Alert>
+        } else {
+          <Alert severity="error">Failed to add product.</Alert>
+        }
+      }
+      
       resetForm();
       onClose();
     } catch (error) {
@@ -70,7 +89,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
         </button>
 
         <h2 className="text-xl font-semibold mb-4 text-gray-800">
-          Add Product
+          {isEditMode ? "Edit Product" : "Add Product"}
         </h2>
         <hr className="border-gray-300 mt-1 mb-3 w-full shadow-sm" />
 
@@ -94,6 +113,23 @@ const AddProductModal = ({ isOpen, onClose }) => {
                 />
                 <ErrorMessage
                   name="name"
+                  component="p"
+                  className="text-red-500 text-xs mt-1"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600">
+                  Brand Name
+                </label>
+                <Field
+                  type="text"
+                  name="brand"
+                  placeholder="Enter brand name"
+                  className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                />
+                <ErrorMessage
+                  name="brand"
                   component="p"
                   className="text-red-500 text-xs mt-1"
                 />
@@ -182,7 +218,7 @@ const AddProductModal = ({ isOpen, onClose }) => {
                   disabled={isSubmitting}
                   className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-70"
                 >
-                  {isSubmitting ? "Saving..." : "Save"}
+                    {isSubmitting ? "Saving..." : isEditMode ? "Update" : "Save"}
                 </button>
               </div>
             </Form>

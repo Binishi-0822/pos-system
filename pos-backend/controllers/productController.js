@@ -6,7 +6,7 @@ export const addProduct = async (req, res) => {
   try {
     console.log("addProduct");
 
-    const { name, category, unit, minStock } = req.body;
+    const { name, brand, category, unit, minStock } = req.body;
 
     // Validate category and unit existence
     const existingCategory = await ProductCategory.findById(category);
@@ -23,6 +23,7 @@ export const addProduct = async (req, res) => {
     // Map correctly to schema field names
     const newProduct = new Product({
       name,
+      brand,
       categoryId: category,
       unitId: unit,
       minStock,
@@ -37,6 +38,30 @@ export const addProduct = async (req, res) => {
   }
 };
 
+export const updateProduct = async (req, res) => {
+  try {
+    const { _id, name, brand, category, unit, minStock } = req.body;
+
+    if (!_id) {
+      return res.status(400).json({ success: false, message: "Product ID is required" });
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      _id,
+      { name, category, unit, minStock },
+      { new: true }
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ success: false, message: "Product not found" });
+    }
+
+    return res.status(200).json({ success: true, product: updatedProduct });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
 
 export const getAllProducts = async (req, res) => {
   try {
