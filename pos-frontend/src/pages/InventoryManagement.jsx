@@ -5,16 +5,21 @@ import LowStockAlert from "../components/inventoryManagement/LowStockAlert";
 import DataGridTable from "../components/DataGridTable";
 import AddProductModal from "../components/inventoryManagement/AddProductModal";
 import { getProducts } from "../services/productService";
+import { Eye, Edit, Trash2 } from "lucide-react";
+import { formHelperTextClasses } from "@mui/material/FormHelperText";
 
 const InventoryManagement = () => {
   const paginationModel = { page: 0, pageSize: 5 };
   const [showModal, setShowModal] = useState(false);
   const [rowData, setRowData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRowData, setSelectedRowData] = useState({});
+  const [isEditMode, setIsEditMode] = useState(formHelperTextClasses)
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "name", headerName: "Product Name", flex: 1 },
+    { field: "brand", headerName: "Brand Name", flex: 1 },
     { field: "category", headerName: "Category", flex: 1 },
     { field: "minStock", headerName: "Min Stock", flex: 1 },
     {
@@ -58,8 +63,44 @@ const InventoryManagement = () => {
       },
     },
 
-    { field: "action", headerName: "Action", flex: 0.8 },
+    {
+      field: "action",
+      headerName: "Action",
+      flex: 0.5,
+      sortable: false,
+      renderCell: (params) => (
+        <div className="flex justify-center items-center gap-1 h-full">
+          <button
+            className="text-blue-600 p-1 hover:text-blue-700 transition duration-200"
+            title="View Batches"
+            onClick={() => handleViewBatches(params.row)}
+          >
+            <Eye size={18} />
+          </button>
+          <button
+            className="text-green-600  p-1 hover:text-green-700 transition duration-200"
+            title="Edit Product"
+            onClick={() => handleEdit(params.row)}
+          >
+            <Edit size={18} />
+          </button>
+          <button
+            className="text-red-600 p-1 hover:text-red-700 transition duration-200"
+            title="Delete Product"
+            onClick={() => handleDelete(params.row)}
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
+      ),
+    },
   ];
+
+  const handleEdit = (row) => {
+    setSelectedRowData(row);
+    setIsEditMode(true)
+    setShowModal(true);
+  };
 
   useEffect(() => {
     const getRowData = async () => {
@@ -69,16 +110,21 @@ const InventoryManagement = () => {
         if (response.success) {
           const formattedData = response.data.map((item, index) => ({
             id: index + 1,
+            _id: item._id,
             name: item.name,
+            brand: item.brand,
             category: item.categoryId?.name || "N/A",
-            minStock: `${item.minStock} ${item.unitId?.symbol || ""}`,
+            categoryId: item.categoryId?._id || "",
+            unit: item.unitId?.name || "",
+            unitId: item.unitId?._id || "",
+            minStock: item.minStock,
+            unitSymbol: item.unitId?.symbol || "",
             status:
               item.status === "out_of_stock"
                 ? "Out of Stock"
                 : item.status === "low_stock"
                 ? "Low Stock"
                 : "In Stock",
-            action: "Edit",
           }));
 
           setRowData(formattedData);
@@ -122,7 +168,16 @@ const InventoryManagement = () => {
 
         <button
           className="w-1/3 bg-blue-600 text-white font-medium px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setShowModal(true)
+            setIsEditMode(false)
+            setSelectedRowData({
+              name: "",
+              category: "",
+              unit: "",
+              minStock: "",
+            })
+          }}
         >
           + Add Product
         </button>
@@ -136,7 +191,12 @@ const InventoryManagement = () => {
         />
       </div>
 
-      <AddProductModal isOpen={showModal} onClose={() => setShowModal(false)} />
+      <AddProductModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        data={selectedRowData}
+        isEditMode={isEditMode}
+      />
     </div>
   );
 };

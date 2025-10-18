@@ -5,6 +5,11 @@ export const addProductValidationSchema = Yup.object({
     .required("Product name is required")
     .min(2, "Product name must be at least 2 characters"),
 
+  brand: Yup.string()
+    .required("Brand name is required")
+    .min(2, "Brand name must be at least 2 characters"),
+
+
   category: Yup.string()
     .required("Please select a category")
     .notOneOf([""], "Please select a category"),

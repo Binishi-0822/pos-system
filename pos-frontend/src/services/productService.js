@@ -12,6 +12,16 @@ export const addProduct = async (productData) => {
   }
 };
 
+export const updateProduct = async (productData) => {
+  try {
+    console.log("ProductData : ",productData)
+    const response = await axios.post(`${API_URL}/update-product`,productData);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding product:", error);
+    throw error;
+  }
+};
 
 export const getProducts = async () => {
   try {
@@ -22,3 +32,4 @@ export const getProducts = async () => {
     throw error;
   }
 };
+
