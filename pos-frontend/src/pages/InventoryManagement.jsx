@@ -15,6 +15,8 @@ const InventoryManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRowData, setSelectedRowData] = useState({});
   const [isEditMode, setIsEditMode] = useState(formHelperTextClasses)
+  const [reload, setReload] = useState(false);
+
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
@@ -117,8 +119,9 @@ const InventoryManagement = () => {
             categoryId: item.categoryId?._id || "",
             unit: item.unitId?.name || "",
             unitId: item.unitId?._id || "",
-            minStock: item.minStock,
+            minimumStock: item.minStock,
             unitSymbol: item.unitId?.symbol || "",
+            minStock: `${item.minStock} ${item.unitId?.symbol || ""}`,
             status:
               item.status === "out_of_stock"
                 ? "Out of Stock"
@@ -138,7 +141,11 @@ const InventoryManagement = () => {
     };
 
     getRowData();
-  }, []);
+  }, [reload]);
+
+  const handleReload = () => {
+    setReload(prev => !prev);
+  };
 
   const filteredRows =
     searchTerm.trim() === ""
@@ -196,6 +203,7 @@ const InventoryManagement = () => {
         onClose={() => setShowModal(false)}
         data={selectedRowData}
         isEditMode={isEditMode}
+        onReload={handleReload}
       />
     </div>
   );
