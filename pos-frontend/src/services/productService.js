@@ -23,6 +23,16 @@ export const updateProduct = async (productData) => {
   }
 };
 
+export const deleteProduct = async (product_id) => {
+  try {
+    const response = await axios.post(`${API_URL}/delete-product`, { id: product_id });
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    throw error;
+  }
+};
+
 export const getProducts = async () => {
   try {
     const response = await axios.get(`${API_URL}/get-products`);
