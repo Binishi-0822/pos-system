@@ -4,9 +4,11 @@ import InventoryManagementOverview from "../components/inventoryManagement/Inven
 import LowStockAlert from "../components/inventoryManagement/LowStockAlert";
 import DataGridTable from "../components/DataGridTable";
 import AddProductModal from "../components/inventoryManagement/AddProductModal";
-import { getProducts } from "../services/productService";
+import { getProducts, deleteProduct } from "../services/productService";
 import { Eye, Edit, Trash2 } from "lucide-react";
 import { formHelperTextClasses } from "@mui/material/FormHelperText";
+import ConfirmDialog from "../components/ConfirmDialog";
+import Alert from "@mui/material/Alert";
 
 const InventoryManagement = () => {
   const paginationModel = { page: 0, pageSize: 5 };
@@ -14,9 +16,15 @@ const InventoryManagement = () => {
   const [rowData, setRowData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRowData, setSelectedRowData] = useState({});
-  const [isEditMode, setIsEditMode] = useState(formHelperTextClasses)
+  const [isEditMode, setIsEditMode] = useState(formHelperTextClasses);
   const [reload, setReload] = useState(false);
-
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [alert, setAlert] = useState({
+    show: false,
+    message: "",
+    severity: "",
+  });
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
@@ -100,8 +108,13 @@ const InventoryManagement = () => {
 
   const handleEdit = (row) => {
     setSelectedRowData(row);
-    setIsEditMode(true)
+    setIsEditMode(true);
     setShowModal(true);
+  };
+
+  const handleDelete = (row) => {
+    setProductToDelete(row);
+    setShowConfirm(true);
   };
 
   useEffect(() => {
@@ -144,7 +157,7 @@ const InventoryManagement = () => {
   }, [reload]);
 
   const handleReload = () => {
-    setReload(prev => !prev);
+    setReload((prev) => !prev);
   };
 
   const filteredRows =
@@ -158,9 +171,52 @@ const InventoryManagement = () => {
           );
         });
 
+  const confirmDelete = async () => {
+    try {
+      const result = await deleteProduct(productToDelete._id);
+      if (result?.success) {
+        setAlert({
+          show: true,
+          message: "Product deleted successfully!",
+          severity: "success",
+        });
+        handleReload(); // refresh table
+      } else {
+        setAlert({
+          show: true,
+          message: "Failed to delete product.",
+          severity: "error",
+        });
+      }
+
+      setShowConfirm(false);
+      setProductToDelete(null);
+
+      // Auto-hide alert after 2 seconds
+      setTimeout(() => {
+        setAlert({ show: false, message: "", severity: "" });
+      }, 5000);
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      setAlert({
+        show: true,
+        message: "Something went wrong! Failed to delete product",
+        severity: "error",
+      });
+    }
+  };
+
   return (
     <div className="flex-1 w-full px-0">
       <SectionTitle title="Inventory Management" icon="📦" />
+      <div className="px-6 mt-6">
+        {alert.show && (
+          <Alert severity={alert.severity} className="mb-3">
+            {alert.message}
+          </Alert>
+        )}
+      </div>
+      
       <InventoryManagementOverview />
       <LowStockAlert />
 
@@ -176,14 +232,14 @@ const InventoryManagement = () => {
         <button
           className="w-1/3 bg-blue-600 text-white font-medium px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-200"
           onClick={() => {
-            setShowModal(true)
-            setIsEditMode(false)
+            setShowModal(true);
+            setIsEditMode(false);
             setSelectedRowData({
               name: "",
               category: "",
               unit: "",
               minStock: "",
-            })
+            });
           }}
         >
           + Add Product
@@ -204,6 +260,14 @@ const InventoryManagement = () => {
         data={selectedRowData}
         isEditMode={isEditMode}
         onReload={handleReload}
+      />
+
+      <ConfirmDialog
+        isOpen={showConfirm}
+        title="Delete Product"
+        message={`Are you sure you want to delete "${productToDelete?.name}"?`}
+        onConfirm={confirmDelete}
+        onCancel={() => setShowConfirm(false)}
       />
     </div>
   );
