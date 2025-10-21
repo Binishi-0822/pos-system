@@ -6,8 +6,10 @@ import { addProduct, updateProduct } from "../../services/productService";
 import Alert from "@mui/material/Alert";
 
 
-const AddProductModal = ({ isOpen, onClose, data, isEditMode }) => {
-  if (!isOpen) return null; // Hide modal when not open
+const AddProductModal = ({ isOpen, onClose, data, isEditMode, onReload }) => {
+  const [alert, setAlert] = useState({ show: false, message: "", severity: "" });
+  const [categories, setCategories] = useState([]);
+  const [measurements, setMeasurements] = useState([]);
 
   const initialValues = {
     name: data?.name || "",
@@ -17,44 +19,53 @@ const AddProductModal = ({ isOpen, onClose, data, isEditMode }) => {
     minStock: data?.minStock || "",
   };
 
-
-  const handleSubmit = async (values, { resetForm, setSubmitting }) => {
+ const handleSubmit = async (values, { resetForm, setSubmitting }) => {
     try {
-    console.log("handle submit",values)
-      if(isEditMode){
-        const updatedValue = {
-          ...values,
-          _id: data._id
-        }
-        const result = await updateProduct(updatedValue);
-
-        if (result?.product._id) {
-          <Alert severity="success">Product updated successfully!</Alert>
-        } else {
-          <Alert severity="error">Failed to update product.</Alert>
-        }
-
-      }else{
-        const result = await addProduct(values);
-        if (result?.product._id) {
-          <Alert severity="success">Product added successfully!</Alert>
-        } else {
-          <Alert severity="error">Failed to add product.</Alert>
-        }
+      let result;
+      if (isEditMode) {
+        const updatedValue = { ...values, _id: data._id };
+        result = await updateProduct(updatedValue);
+      } else {
+        result = await addProduct(values);
       }
-      
+
+      if (result?.product?._id) {
+        setAlert({
+          show: true,
+          message: isEditMode
+            ? "Product updated successfully!"
+            : "Product added successfully!",
+          severity: "success",
+        });
+      } else {
+        setAlert({
+          show: true,
+          message: "Failed to save product.",
+          severity: "error",
+        });
+      }
+
+      setTimeout(() => {
+        setAlert({ show: false, message: "", severity: "" });
+        onClose();
+      }, 2000);
       resetForm();
-      onClose();
+      onReload();
+
+      // Auto-hide alert after 2 seconds
+     
+
     } catch (error) {
       console.error(error);
-      alert("Failed to add product!");
+      setAlert({
+        show: true,
+        message: "Something went wrong!",
+        severity: "error",
+      });
     } finally {
       setSubmitting(false);
     }
   };
-
-  const [categories, setCategories] = useState([]);
-  const [measurements, setMeasurements] = useState([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -78,6 +89,9 @@ const AddProductModal = ({ isOpen, onClose, data, isEditMode }) => {
     fetchMeasurements();
   }, []);
 
+  if (!isOpen) return null; // Hide modal when not open
+
+
   return (
     <div className="fixed inset-0 flex justify-center items-center bg-black/40 backdrop-blur-sm z-50">
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md relative">
@@ -92,6 +106,11 @@ const AddProductModal = ({ isOpen, onClose, data, isEditMode }) => {
           {isEditMode ? "Edit Product" : "Add Product"}
         </h2>
         <hr className="border-gray-300 mt-1 mb-3 w-full shadow-sm" />
+        {alert.show && (
+          <Alert severity={alert.severity} className="mb-3">
+            {alert.message}
+          </Alert>
+        )}
 
         <Formik
           initialValues={initialValues}
