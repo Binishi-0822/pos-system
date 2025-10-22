@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import SectionTitle from "../components/SectionTitle";
 import InventoryManagementOverview from "../components/inventoryManagement/InventoryManagementOverview";
-import LowStockAlert from "../components/inventoryManagement/LowStockAlert";
 import DataGridTable from "../components/DataGridTable";
 import AddProductModal from "../components/inventoryManagement/AddProductModal";
 import { getProducts, deleteProduct } from "../services/productService";
@@ -9,6 +8,7 @@ import { Eye, Edit, Trash2 } from "lucide-react";
 import { formHelperTextClasses } from "@mui/material/FormHelperText";
 import ConfirmDialog from "../components/ConfirmDialog";
 import Alert from "@mui/material/Alert";
+import AlertBox from "../components/inventoryManagement/AlertBox";
 
 const InventoryManagement = () => {
   const paginationModel = { page: 0, pageSize: 5 };
@@ -218,7 +218,12 @@ const InventoryManagement = () => {
       </div>
       
       <InventoryManagementOverview />
-      <LowStockAlert />
+      <AlertBox
+        type="warning"
+        title="Low Stock Warning"
+        message="2 products are close to their minimum quantity."
+      />
+
 
       <div className="flex gap-4 px-6 mt-6 justify-between">
         <input
