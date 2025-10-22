@@ -7,6 +7,8 @@ import RoleBaseRoutes from './utils/RoleBaseRoutes'
 import CashierManagement from './pages/cashierManagement/CashierManagement'
 import DashboardOverview from './pages/DashboardOverview/DashboardOverview'
 import InventoryManagement from './pages/InventoryManagement'
+import ManageSupplierInvoices from './pages/ManageSupplierInvoices'
+import CreateNewInvoice from './pages/CreateNewInvoice'
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
           <Route index element={<DashboardOverview/>}></Route>
           <Route path="/admin-dashboard/cashier-management" element={<CashierManagement/>}></Route>
           <Route path="/admin-dashboard/inventory-management" element={<InventoryManagement/>}></Route>
+          <Route path="/admin-dashboard/manage-supplier-invoices" element={<ManageSupplierInvoices/>}></Route>
+          <Route path="/admin-dashboard/create-new-invoice" element={<CreateNewInvoice/>}></Route>
         </Route>
         <Route path="/cashier-dashboard" element={<CashierDashboard/>}></Route>
       </Routes>

@@ -3,6 +3,8 @@ import { MdDashboardCustomize } from "react-icons/md";
 import { IoPersonAddSharp } from "react-icons/io5";
 import { AiOutlineTransaction } from "react-icons/ai";
 import { BiSolidReport } from "react-icons/bi";
+import { FaFileInvoiceDollar } from "react-icons/fa";
+
 
 export const sideBarOptions = {
     owner : [
@@ -16,6 +18,12 @@ export const sideBarOptions = {
             icon: MdInventory,
             title: "Inventory Management",
             path: "/admin-dashboard/inventory-management"
+        },
+
+        {
+            icon: FaFileInvoiceDollar,
+            title: "Supplier Invoices",
+            path: "/admin-dashboard/manage-supplier-invoices"
         },
 
         {
