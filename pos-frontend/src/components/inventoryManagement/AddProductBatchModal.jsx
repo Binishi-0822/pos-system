@@ -1,8 +1,9 @@
 import React from "react";
 import { X } from "lucide-react";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
 
-const AddProductBatchModal = ({ product, onClose }) => {
+const AddProductBatchModal = ({ product, onClose, onAddBatch }) => {
   const initialValues = {
     purchasePrice: "",
     sellingPrice: "",
@@ -10,16 +11,31 @@ const AddProductBatchModal = ({ product, onClose }) => {
     expiryDate: "",
   };
 
+  const validationSchema = Yup.object({
+    purchasePrice: Yup.number()
+      .required("Purchase price is required")
+      .min(0, "Must be at least 0"),
+    sellingPrice: Yup.number()
+      .required("Selling price is required")
+      .min(0, "Must be at least 0"),
+    quantity: Yup.number()
+      .required("Quantity is required")
+      .min(1, "Quantity must be at least 1"),
+    expiryDate: Yup.date().required("Expiry date is required"),
+  });
+
   const handleSubmit = (values) => {
-    console.log("✅ New batch added for:", product.name, values);
-    alert(`Batch added for ${product.name}`);
-    onClose();
+    try {
+      onAddBatch(product, values);
+      onClose();
+    } catch (error) {
+      console.error("Error adding batch:", error);
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative animate-fadeIn">
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
@@ -27,12 +43,15 @@ const AddProductBatchModal = ({ product, onClose }) => {
           <X size={20} />
         </button>
 
-        {/* Modal Header */}
         <h2 className="text-xl font-semibold mb-4 text-gray-800">
           Add Batch for <span className="text-blue-600">{product.name}</span>
         </h2>
 
-        <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
+        >
           {({ isSubmitting }) => (
             <Form className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -46,6 +65,11 @@ const AddProductBatchModal = ({ product, onClose }) => {
                     placeholder="Enter purchase price"
                     className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-100 focus:outline-none"
                   />
+                  <ErrorMessage
+                    name="purchasePrice"
+                    component="div"
+                    className="text-red-600 text-sm mt-1"
+                  />
                 </div>
 
                 <div>
@@ -57,6 +81,11 @@ const AddProductBatchModal = ({ product, onClose }) => {
                     name="sellingPrice"
                     placeholder="Enter selling price"
                     className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-100 focus:outline-none"
+                  />
+                  <ErrorMessage
+                    name="sellingPrice"
+                    component="div"
+                    className="text-red-600 text-sm mt-1"
                   />
                 </div>
 
@@ -71,6 +100,11 @@ const AddProductBatchModal = ({ product, onClose }) => {
                     min="1"
                     className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-100 focus:outline-none"
                   />
+                  <ErrorMessage
+                    name="quantity"
+                    component="div"
+                    className="text-red-600 text-sm mt-1"
+                  />
                 </div>
 
                 <div>
@@ -81,6 +115,11 @@ const AddProductBatchModal = ({ product, onClose }) => {
                     type="date"
                     name="expiryDate"
                     className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-100 focus:outline-none"
+                  />
+                  <ErrorMessage
+                    name="expiryDate"
+                    component="div"
+                    className="text-red-600 text-sm mt-1"
                   />
                 </div>
               </div>
