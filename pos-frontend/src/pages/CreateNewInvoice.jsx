@@ -31,6 +31,7 @@ const CreateNewInvoice = () => {
   const [reload, setReload] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
+  const [invoiceProductList, setInvoiceProductList] = useState([]);
 
   // Fetch products
   useEffect(() => {
@@ -89,17 +90,37 @@ const CreateNewInvoice = () => {
     );
 
     if (matchedProduct) {
-      // Open AddProductBatchModal for existing product
       setSelectedProduct(matchedProduct);
       setShowAddBatchModal(true);
     } else {
-      // Open AddProductModal for new product
       setSearchData({ name: searchTerm });
       setShowAddProductModal(true);
     }
   };
 
   const handleReload = () => setReload((prev) => !prev);
+
+  // Handle adding batch from modal
+  const handleAddBatch = (product, batch) => {
+    const newItem = {
+      id: Date.now(),
+      product: product.name,
+      category: product.category,
+      purchase_price: batch.purchasePrice,
+      selling_price: batch.sellingPrice,
+      quantity: batch.quantity,
+      expire_date: batch.expiryDate,
+      subtotal: batch.purchasePrice * batch.quantity,
+    };
+    setInvoiceProductList((prev) => [...prev, newItem]);
+  };
+
+  // Calculate totals
+  const totalAmount = invoiceProductList.reduce(
+    (sum, item) => sum + Number(item.subtotal || 0),
+    0
+  );
+  const totalItems = invoiceProductList.length;
 
   return (
     <div className="flex-1 w-full px-0">
@@ -251,12 +272,61 @@ const CreateNewInvoice = () => {
                 )}
               </div>
 
+              {/* Invoice Product Table */}
+              {invoiceProductList.length > 0 && (
+                <div className="mt-6 rounded-lg bg-white border shadow-md p-5 w-full">
+                  <h3 className="text-lg font-semibold mb-3">
+                    Invoice Products
+                  </h3>
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="p-2">Product</th>
+                        <th className="p-2">Category</th>
+                        <th className="p-2">Purchase Price</th>
+                        <th className="p-2">Selling Price</th>
+                        <th className="p-2">Quantity</th>
+                        <th className="p-2">Subtotal</th>
+                        <th className="p-2">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {invoiceProductList.map((item) => (
+                        <tr key={item.id} className="border-b">
+                          <td className="p-2">{item.product}</td>
+                          <td className="p-2">{item.category}</td>
+                          <td className="p-2">{item.purchase_price}</td>
+                          <td className="p-2">{item.selling_price}</td>
+                          <td className="p-2">{item.quantity}</td>
+                          <td className="p-2">{item.subtotal}</td>
+                          <td className="p-2">
+                            <button
+                              onClick={() =>
+                                setInvoiceProductList((prev) =>
+                                  prev.filter((i) => i.id !== item.id)
+                                )
+                              }
+                              className="text-red-600 hover:underline"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
               {/* Summary */}
               <div className="rounded-lg bg-white border shadow-md p-5 w-full mt-6 flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-500">Total Items: 0</p>
+                  <p className="text-sm text-gray-500">
+                    Total Items: {totalItems}
+                  </p>
                   <p className="text-lg font-semibold text-gray-800">
-                    Total Amount: <span className="text-blue-600">Rs. 0</span>
+                    Total Amount:{" "}
+                    <span className="text-blue-600">Rs. {totalAmount}</span>
                   </p>
                 </div>
 
@@ -291,10 +361,20 @@ const CreateNewInvoice = () => {
         onReload={handleReload}
       />
 
-      {selectedProduct && (
+      {selectedProduct && showAddBatchModal && (
         <AddProductBatchModal
           product={selectedProduct}
-          onClose={() => setShowAddBatchModal(false)}
+          onClose={() => {
+            setShowAddBatchModal(false);
+            setSelectedProduct(null); // also reset selected product
+          }}
+          onAddBatch={(product, batchData) => {
+            // Add batch to invoiceProductList
+            setInvoiceProductList((prev) => [
+              ...prev,
+              { product: product.name, ...batchData },
+            ]);
+          }}
         />
       )}
     </div>
