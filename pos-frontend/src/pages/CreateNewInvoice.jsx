@@ -14,6 +14,8 @@ import AddProductModal from "../components/inventoryManagement/AddProductModal";
 import AddProductBatchModal from "../components/inventoryManagement/AddProductBatchModal";
 import { getProducts } from "../services/productService";
 import AlertBox from "../components/inventoryManagement/AlertBox";
+import DataGridTable from "../components/DataGridTable";
+import { Eye, Edit, Trash2 } from "lucide-react";
 
 const CreateNewInvoice = () => {
   const navigate = useNavigate();
@@ -32,6 +34,47 @@ const CreateNewInvoice = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
   const [invoiceProductList, setInvoiceProductList] = useState([]);
+
+   const columns = [
+    { field: "product", headerName: "Product", flex: 0.5 },
+    { field: "category", headerName: "Category", flex: 1 },
+    { field: "purchase_price", headerName: "Purchase Price", flex: 1 },
+    { field: "selling_price", headerName: "Selling Price", flex: 1 },
+    { field: "expire_date", headerName: "Expire Date", flex: 1 },
+    { field: "quantity", headerName: "Quantity", flex: 1 },
+    { field: "subtotal", headerName: "Subtotal", flex: 1 },
+    {
+      field: "action",
+      headerName: "Action",
+      flex: 0.5,
+      sortable: false,
+      renderCell: (params) => (
+        <div className="flex justify-center items-center gap-1 h-full">
+          {/* <button
+            className="text-blue-600 p-1 hover:text-blue-700 transition duration-200"
+            title="View Batches"
+            onClick={() => handleViewBatches(params.row)}
+          >
+            <Eye size={18} />
+          </button>
+          <button
+            className="text-green-600  p-1 hover:text-green-700 transition duration-200"
+            title="Edit Product"
+            onClick={() => handleEdit(params.row)}
+          >
+            <Edit size={18} />
+          </button> */}
+          <button
+            className="text-red-600 p-1 hover:text-red-700 transition duration-200"
+            title="Delete Product"
+            onClick={() => handleDelete(params.row)}
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   // Fetch products
   useEffect(() => {
@@ -274,43 +317,11 @@ const CreateNewInvoice = () => {
                   <h3 className="text-lg font-semibold mb-3">
                     Invoice Products
                   </h3>
-                  <table className="w-full text-left border-collapse">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="p-2">Product</th>
-                        <th className="p-2">Category</th>
-                        <th className="p-2">Purchase Price</th>
-                        <th className="p-2">Selling Price</th>
-                        <th className="p-2">Quantity</th>
-                        <th className="p-2">Subtotal</th>
-                        <th className="p-2">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {invoiceProductList.map((item) => (
-                        <tr key={item.id} className="border-b">
-                          <td className="p-2">{item.product}</td>
-                          <td className="p-2">{item.category}</td>
-                          <td className="p-2">{item.purchase_price}</td>
-                          <td className="p-2">{item.selling_price}</td>
-                          <td className="p-2">{item.quantity}</td>
-                          <td className="p-2">{item.subtotal}</td>
-                          <td className="p-2">
-                            <button
-                              onClick={() =>
-                                setInvoiceProductList((prev) =>
-                                  prev.filter((i) => i.id !== item.id)
-                                )
-                              }
-                              className="text-red-600 hover:underline"
-                            >
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <DataGridTable
+                    rows={invoiceProductList}
+                    columns={columns}
+                    isSearch={searchTerm.trim() !== ""}
+                  />
                 </div>
               )}
 
