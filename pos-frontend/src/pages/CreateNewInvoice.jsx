@@ -76,6 +76,12 @@ const CreateNewInvoice = () => {
     },
   ];
 
+  const handleDelete = (row) => {
+    setInvoiceProductList((prevList) =>
+      prevList.filter((item) => item.id !== row.id)
+    );
+  };
+
   // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
