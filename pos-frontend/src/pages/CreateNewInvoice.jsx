@@ -100,27 +100,14 @@ const CreateNewInvoice = () => {
 
   const handleReload = () => setReload((prev) => !prev);
 
-  // Handle adding batch from modal
-  const handleAddBatch = (product, batch) => {
-    const newItem = {
-      id: Date.now(),
-      product: product.name,
-      category: product.category,
-      purchase_price: batch.purchasePrice,
-      selling_price: batch.sellingPrice,
-      quantity: batch.quantity,
-      expire_date: batch.expiryDate,
-      subtotal: batch.purchasePrice * batch.quantity,
-    };
-    setInvoiceProductList((prev) => [...prev, newItem]);
-  };
-
   // Calculate totals
   const totalAmount = invoiceProductList.reduce(
     (sum, item) => sum + Number(item.subtotal || 0),
     0
   );
   const totalItems = invoiceProductList.length;
+
+  const isModalOpen = showAddProductModal || showAddBatchModal;
 
   return (
     <div className="flex-1 w-full px-0">
@@ -212,62 +199,71 @@ const CreateNewInvoice = () => {
                     onChange={(e) => handleSearch(e.target.value)}
                     placeholder="Search products to add..."
                     className="w-full border border-gray-300 rounded-md pl-9 pr-3 py-2 focus:ring-2 focus:ring-blue-400 focus:outline-none mb-4"
+                    disabled={isModalOpen}
                   />
                 </div>
 
-                {searchTerm.trim() === "" ? (
-                  <div className="border-2 border-dashed border-gray-200 rounded-md flex flex-col items-center justify-center py-10 text-gray-400">
-                    <Package className="w-10 h-10 mb-2" />
-                    <p className="font-medium text-gray-500">
-                      No products added yet
-                    </p>
-                    <p className="text-sm">
-                      Search and add products using the search bar above
-                    </p>
-                  </div>
-                ) : (
+                {!isModalOpen && (
                   <>
-                    {filteredProducts.length > 0 && (
-                      <div className="space-y-2">
-                        {filteredProducts.map((p) => (
+                    {searchTerm.trim() === "" &&
+                    invoiceProductList.length === 0 ? (
+                      <div className="border-2 border-dashed border-gray-200 rounded-md flex flex-col items-center justify-center py-10 text-gray-400">
+                        <Package className="w-10 h-10 mb-2" />
+                        <p className="font-medium text-gray-500">
+                          No products added yet
+                        </p>
+                        <p className="text-sm">
+                          Search and add products using the search bar above
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        {searchTerm.trim() !== "" &&
+                          filteredProducts.length > 0 && (
+                            <div className="space-y-2">
+                              {filteredProducts.map((p) => (
+                                <div
+                                  key={p._id}
+                                  className="flex justify-between items-center border rounded-md p-3 hover:bg-gray-50 transition cursor-pointer"
+                                  onClick={() => {
+                                    setSelectedProduct(p);
+                                    setShowAddBatchModal(true);
+                                  }}
+                                >
+                                  <div>
+                                    <p className="font-medium text-gray-800">
+                                      {p.name}
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                      Brand: {p.brand} • Min Stock: {p.minStock}
+                                    </p>
+                                  </div>
+                                  <span className="font-semibold text-blue-600">
+                                    Rs. {p.price}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                        {searchTerm.trim() !== "" && (
                           <div
-                            key={p._id}
-                            className="flex justify-between items-center border rounded-md p-3 hover:bg-gray-50 transition cursor-pointer"
-                            onClick={() => {
-                              setSelectedProduct(p);
-                              setShowAddBatchModal(true);
-                            }}
+                            className="border border-green-200 bg-green-50 p-3 rounded-md flex justify-between items-center mt-2 hover:bg-green-100 transition cursor-pointer"
+                            onClick={handleCreateProductClick}
                           >
                             <div>
-                              <p className="font-medium text-gray-800">
-                                {p.name}
+                              <p className="font-medium text-green-800 flex items-center gap-1">
+                                <Plus className="w-4 h-4" />
+                                Create New Product
                               </p>
-                              <p className="text-sm text-gray-500">
-                                Brand: {p.brand} • Min Stock: {p.minStock}
+                              <p className="text-sm text-green-700">
+                                Add "{searchTerm}" to inventory
                               </p>
                             </div>
-                            <span className="font-semibold text-blue-600">
-                              Rs. {p.price}
-                            </span>
                           </div>
-                        ))}
-                      </div>
+                        )}
+                      </>
                     )}
-
-                    <div
-                      className="border border-green-200 bg-green-50 p-3 rounded-md flex justify-between items-center mt-2 hover:bg-green-100 transition cursor-pointer"
-                      onClick={handleCreateProductClick}
-                    >
-                      <div>
-                        <p className="font-medium text-green-800 flex items-center gap-1">
-                          <Plus className="w-4 h-4" />
-                          Create New Product
-                        </p>
-                        <p className="text-sm text-green-700">
-                          Add "{searchTerm}" to inventory
-                        </p>
-                      </div>
-                    </div>
                   </>
                 )}
               </div>
@@ -355,7 +351,10 @@ const CreateNewInvoice = () => {
       {/* Modals */}
       <AddProductModal
         isOpen={showAddProductModal}
-        onClose={() => setShowAddProductModal(false)}
+        onClose={() => {
+          setShowAddProductModal(false);
+          setSearchTerm("");
+        }}
         data={searchData}
         isEditMode={false}
         onReload={handleReload}
@@ -366,14 +365,25 @@ const CreateNewInvoice = () => {
           product={selectedProduct}
           onClose={() => {
             setShowAddBatchModal(false);
-            setSelectedProduct(null); // also reset selected product
+            setSelectedProduct(null);
+            setSearchTerm("");
           }}
           onAddBatch={(product, batchData) => {
-            // Add batch to invoiceProductList
-            setInvoiceProductList((prev) => [
-              ...prev,
-              { product: product.name, ...batchData },
-            ]);
+            const newItem = {
+              id: Date.now(),
+              product: product.name,
+              category: product.category,
+              purchase_price: batchData.purchasePrice,
+              selling_price: batchData.sellingPrice,
+              quantity: batchData.quantity,
+              expire_date: batchData.expiryDate,
+              subtotal: batchData.purchasePrice * batchData.quantity,
+            };
+            setInvoiceProductList((prev) => [...prev, newItem]);
+            setShowAddBatchModal(false);
+            setSelectedProduct(null);
+            setSearchTerm("");
+            handleReload();
           }}
         />
       )}

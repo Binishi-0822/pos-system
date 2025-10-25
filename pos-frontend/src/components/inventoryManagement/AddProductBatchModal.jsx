@@ -24,9 +24,10 @@ const AddProductBatchModal = ({ product, onClose, onAddBatch }) => {
     expiryDate: Yup.date().required("Expiry date is required"),
   });
 
-  const handleSubmit = (values) => {
+  const handleSubmit = (values, { resetForm }) => {
     try {
       onAddBatch(product, values);
+      resetForm();
       onClose();
     } catch (error) {
       console.error("Error adding batch:", error);
