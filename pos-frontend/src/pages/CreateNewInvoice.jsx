@@ -36,12 +36,24 @@ const CreateNewInvoice = () => {
   const [invoiceProductList, setInvoiceProductList] = useState([]);
 
    const columns = [
-    { field: "product", headerName: "Product", flex: 0.5 },
+    {
+      field: "product",
+      headerName: "Product",
+      flex: 1,
+      renderCell: (params) => (
+        <div
+          className="truncate max-w-[200px]"
+          title={params.value}
+        >
+          {params.value}
+        </div>
+      ),
+    },
     { field: "category", headerName: "Category", flex: 1 },
     { field: "purchase_price", headerName: "Purchase Price", flex: 1 },
     { field: "selling_price", headerName: "Selling Price", flex: 1 },
     { field: "expire_date", headerName: "Expire Date", flex: 1 },
-    { field: "quantity", headerName: "Quantity", flex: 1 },
+    { field: "quantity", headerName: "Quantity", flex: 0.5 },
     { field: "subtotal", headerName: "Subtotal", flex: 1 },
     {
       field: "action",
