@@ -53,9 +53,14 @@ const AddProductBatchModal = ({
         </button>
 
         <h2 className="text-xl font-semibold mb-4 text-gray-800">
-          {isViewMode ? "View Batch" : "Add Batch"} for{" "}
-          <span className="text-blue-600">{product.name ? product.name : product.product}</span>
+          {isViewMode
+            ? "View Batch"
+            : isEditMode
+            ? "Edit Batch"
+            : "Add Batch"}{" "}
+          for <span className="text-blue-600">{product.name ? product.name : product.product}</span>
         </h2>
+
 
         <Formik
           initialValues={initialValues}
