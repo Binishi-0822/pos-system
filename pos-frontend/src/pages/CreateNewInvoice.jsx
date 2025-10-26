@@ -417,8 +417,8 @@ const CreateNewInvoice = () => {
             setSearchTerm("");
           }}
           onAddBatch={(product, batchData) => {
-            const newItem = {
-              id: Date.now(),
+            const updatedItem = {
+              id: product.id || Date.now(),
               product: product.name,
               category: product.category,
               purchase_price: batchData.purchasePrice,
@@ -427,12 +427,24 @@ const CreateNewInvoice = () => {
               expire_date: batchData.expiryDate,
               subtotal: batchData.purchasePrice * batchData.quantity,
             };
-            setInvoiceProductList((prev) => [...prev, newItem]);
+
+            setInvoiceProductList((prev) => {
+              // if editing, replace; if adding, append
+              const existingIndex = prev.findIndex((item) => item.id === product.id);
+              if (existingIndex !== -1) {
+                const updatedList = [...prev];
+                updatedList[existingIndex] = updatedItem;
+                return updatedList;
+              }
+              return [...prev, updatedItem];
+            });
+
             setShowAddBatchModal(false);
             setSelectedProduct(null);
             setSearchTerm("");
             handleReload();
           }}
+
         />
       )}
     </div>
