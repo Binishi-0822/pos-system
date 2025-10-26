@@ -34,6 +34,9 @@ const CreateNewInvoice = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
   const [invoiceProductList, setInvoiceProductList] = useState([]);
+  const [isViewMode, setIsViewMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+
 
    const columns = [
     {
@@ -62,7 +65,7 @@ const CreateNewInvoice = () => {
       sortable: false,
       renderCell: (params) => (
         <div className="flex justify-center items-center gap-1 h-full">
-          {/* <button
+          <button
             className="text-blue-600 p-1 hover:text-blue-700 transition duration-200"
             title="View Batches"
             onClick={() => handleViewBatches(params.row)}
@@ -75,7 +78,7 @@ const CreateNewInvoice = () => {
             onClick={() => handleEdit(params.row)}
           >
             <Edit size={18} />
-          </button> */}
+          </button>
           <button
             className="text-red-600 p-1 hover:text-red-700 transition duration-200"
             title="Delete Product"
@@ -93,6 +96,20 @@ const CreateNewInvoice = () => {
       prevList.filter((item) => item.id !== row.id)
     );
   };
+
+  const handleViewBatches = (row) => {
+    setSelectedProduct(row);
+    setShowAddBatchModal(true);
+    setIsViewMode(true);
+  };
+
+   const handleEdit = (row) => {
+    setSelectedProduct(row);
+    setShowAddBatchModal(true);
+    setIsViewMode(false);
+    setIsEditMode(true);
+  };
+
 
   // Fetch products
   useEffect(() => {
@@ -392,6 +409,8 @@ const CreateNewInvoice = () => {
       {selectedProduct && showAddBatchModal && (
         <AddProductBatchModal
           product={selectedProduct}
+          isViewMode={isViewMode}
+          isEditMode={isEditMode}
           onClose={() => {
             setShowAddBatchModal(false);
             setSelectedProduct(null);

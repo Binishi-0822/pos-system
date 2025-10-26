@@ -1,18 +1,19 @@
-import React from 'react'
-import {useAuth} from '../context/AuthContext'
-import { Outlet, useNavigate } from 'react-router-dom'
-import SideBar from '../components/SideBar'
+import React from "react";
+import { useAuth } from "../context/AuthContext";
+import { Outlet } from "react-router-dom";
+import SideBar from "../components/SideBar";
 
 const AdminDashboard = () => {
-  const {user} = useAuth()
-  const navigate = useNavigate()
+  const { user } = useAuth();
 
   return (
-    <div className='flex'>
-      <SideBar/>
-      <Outlet/>
+    <div className="flex min-h-screen bg-gray-50">
+      <SideBar />
+      <main className="flex-1 overflow-y-auto p-6">
+        <Outlet />
+      </main>
     </div>
-  )
-}
+  );
+};
 
-export default AdminDashboard
+export default AdminDashboard;
