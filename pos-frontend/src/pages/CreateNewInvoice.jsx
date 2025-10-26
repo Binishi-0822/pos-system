@@ -444,7 +444,6 @@ const CreateNewInvoice = () => {
             setSearchTerm("");
             handleReload();
           }}
-
         />
       )}
     </div>
