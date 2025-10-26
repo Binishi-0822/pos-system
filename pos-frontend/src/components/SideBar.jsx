@@ -39,7 +39,7 @@ const SideBar = () => {
                 </NavLink>
                 <NavLink 
                     to="/login"  
-                    className="bg-primary-color-2 hover:bg-primary-color-1 rounded-lg flex items-center gap-3 pl-5 mb-14 pb-3 pt-3 ml-3 mr-3"
+                    className="bg-primary-color-2 hover:bg-primary-color-1 rounded-lg flex items-center gap-3 pl-5 mb-4 pb-3 pt-3 ml-3 mr-3"
                 >
                     <LuLogIn className="text-secondary-color-1"/>
                     <span className="text-secondary-color-1">Log Out</span>
