@@ -7,9 +7,12 @@ const AdminDashboard = () => {
   const { user } = useAuth();
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex bg-gray-50 min-h-screen">
+      {/* Sidebar - Fixed */}
       <SideBar />
-      <main className="flex-1 overflow-y-auto p-6">
+
+      {/* Main content - shifted right by sidebar width */}
+      <main className="flex-1 ml-64 p-6 overflow-y-auto h-screen">
         <Outlet />
       </main>
     </div>

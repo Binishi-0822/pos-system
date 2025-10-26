@@ -10,6 +10,7 @@ const AddProductBatchModal = ({
   isViewMode = false,
   isEditMode = false,
 }) => {
+  console.log("product : ",product)
   const initialValues = {
     purchasePrice: product.purchase_price || "",
     sellingPrice: product.selling_price || "",
