@@ -11,3 +11,13 @@ export const addInvoice = async (invoiceData) => {
     throw error;
   }
 };
+
+export const getAllInvoices = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/get-all-invoices`);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating invoice:", error);
+    throw error;
+  }
+};

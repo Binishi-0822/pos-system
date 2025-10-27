@@ -1,6 +1,6 @@
 import Invoice from "../models/Invoice.js";
 import ProductBatch from "../models/ProductBatch.js";
-
+import Product from "../models/Product.js";
 
 export const createInvoice = async (req, res) => {
   try {
@@ -57,5 +57,23 @@ export const createInvoice = async (req, res) => {
       success: false,
       message: "Server error while creating invoice",
     });
+  }
+};
+
+
+export const getAllInvoices = async (req, res) => {
+  try {
+    const invoices = await Invoice.find()
+      .populate({
+        path: "items.batch_id",
+        model: ProductBatch,
+        populate: { path: "product_id", model: Product },
+      })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, data: invoices }); // send response
+  } catch (error) {
+    console.error("Error fetching invoices:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch invoices", error: error.message });
   }
 };
