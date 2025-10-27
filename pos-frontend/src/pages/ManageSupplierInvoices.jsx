@@ -78,7 +78,7 @@ const ManageSupplierInvoices = () => {
   // ----------------------------
   // Format rows
   // ----------------------------
-  const rows = invoices.map((invoice) => ({
+  const rowData = invoices.map((invoice) => ({
     ...invoice,
     id: invoice._id,
     invoice_date: new Date(invoice.invoice_date).toLocaleDateString("en-GB"), // DD/MM/YYYY
@@ -98,6 +98,17 @@ const ManageSupplierInvoices = () => {
   const handleDelete = (invoice) => {
     console.log("Delete Invoice:", invoice);
   };
+
+  const filteredRows =
+    searchTerm.trim() === ""
+      ? rowData
+      : rowData.filter((row) => {
+          const lowerSearch = searchTerm.toLowerCase();
+          return (
+            row.supplier_name.toLowerCase().includes(lowerSearch) ||
+            row.invoice_date.toLowerCase().includes(lowerSearch)
+          );
+        });
 
   // ----------------------------
   // Render
@@ -133,7 +144,7 @@ const ManageSupplierInvoices = () => {
         <h3 className="text-lg font-semibold mb-3 text-gray-600">Invoice Details</h3>
         <div className="w-full h-[500px]"> {/* Ensures full alignment */}
           <DataGridTable
-            rows={rows}
+            rows={filteredRows}
             columns={columns}
             isSearch={searchTerm.trim() !== ""}
           />
