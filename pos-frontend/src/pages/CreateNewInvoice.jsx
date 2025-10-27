@@ -16,6 +16,9 @@ import { getProducts } from "../services/productService";
 import AlertBox from "../components/inventoryManagement/AlertBox";
 import DataGridTable from "../components/DataGridTable";
 import { Eye, Edit, Trash2 } from "lucide-react";
+import { addInvoice } from "../services/invoiceService";
+import Alert from "@mui/material/Alert";
+
 
 const CreateNewInvoice = () => {
   const navigate = useNavigate();
@@ -36,6 +39,11 @@ const CreateNewInvoice = () => {
   const [invoiceProductList, setInvoiceProductList] = useState([]);
   const [isViewMode, setIsViewMode] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [alert, setAlert] = useState({
+    show: false,
+    message: "",
+    severity: "",
+  });
 
 
    const columns = [
@@ -103,12 +111,71 @@ const CreateNewInvoice = () => {
     setIsViewMode(true);
   };
 
-   const handleEdit = (row) => {
+  const handleEdit = (row) => {
     setSelectedProduct(row);
     setShowAddBatchModal(true);
     setIsViewMode(false);
     setIsEditMode(true);
   };
+
+  const handleSubmit = async (values, { resetForm }) => {
+    try {
+      const invoiceData = {
+        supplier_name: values.supplier_name,
+        invoice_number: values.invoice_number,
+        invoice_date: values.invoice_date,
+        products: invoiceProductList.map((item) => ({
+          product_id: item._id,
+          purchase_price: item.purchase_price,
+          selling_price: item.selling_price,
+          quantity: item.quantity,
+          expire_date: item.expire_date,
+        })),
+        total_amount: totalAmount,
+        total_items: totalItems,
+      };
+
+      console.log("Invoice Data:", invoiceData);
+
+      const result = await addInvoice(invoiceData);
+
+      if (result?.success) {
+        setAlert({
+          show: true,
+          message: "Invoice details saved successfully!",
+          severity: "success",
+        });
+
+        // Clear form + product list + reset search
+        resetForm();
+        setInvoiceProductList([]);
+        setSearchTerm("");
+        setSelectedProduct(null);
+
+        // Optional: Reload products
+        handleReload();
+
+        // Auto-hide alert after a few seconds
+        setTimeout(() => {
+          setAlert({ show: false, message: "", severity: "" });
+        }, 3000);
+      } else {
+        setAlert({
+          show: true,
+          message: "Something went wrong! Failed to save invoice details.",
+          severity: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setAlert({
+        show: true,
+        message: "Error saving invoice. Please try again later.",
+        severity: "error",
+      });
+    }
+  };
+
 
 
   // Fetch products
@@ -202,7 +269,15 @@ const CreateNewInvoice = () => {
       <SectionTitle title="Create New Invoice" icon="🧾" />
 
       <div className="px-6 mt-6">
-        <Formik initialValues={initialValues}>
+        {alert.show && (
+          <Alert severity={alert.severity} className="mb-3">
+            {alert.message}
+          </Alert>
+        )}
+      </div>
+
+      <div className="px-6 mt-6">
+        <Formik initialValues={initialValues} onSubmit={handleSubmit}>
           {() => (
             <Form>
               {/* Invoice Information */}
@@ -417,8 +492,10 @@ const CreateNewInvoice = () => {
             setSearchTerm("");
           }}
           onAddBatch={(product, batchData) => {
+            console.log("product : ",product)
             const updatedItem = {
               id: product.id || Date.now(),
+              _id: product._id,
               product: product.name,
               category: product.category,
               purchase_price: batchData.purchasePrice,

@@ -1,0 +1,61 @@
+import Invoice from "../models/Invoice.js";
+import ProductBatch from "../models/ProductBatch.js";
+
+
+export const createInvoice = async (req, res) => {
+  try {
+    const { supplier_name, invoice_number, invoice_date, products } = req.body;
+
+    // Basic validation
+    if (!supplier_name || !invoice_date || !products?.length) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
+    }
+
+    //  Create and save product batches first
+    const savedBatches = await Promise.all(
+      products.map(async (p) => {
+        const newBatch = new ProductBatch({
+          product_id: p.product_id,
+          purchase_price: p.purchase_price,
+          selling_price: p.selling_price,
+          quantity: p.quantity,
+          expire_date: p.expire_date,
+        });
+        return await newBatch.save();
+      })
+    );
+
+    // Prepare invoice with references to saved batches
+    const invoice = new Invoice({
+      supplier_name,
+      invoice_number,
+      invoice_date,
+      items: savedBatches.map((batch) => ({
+        batch_id: batch._id,
+      })),
+      total_items: savedBatches.length,
+      total_amount: savedBatches.reduce(
+        (sum, batch, index) =>
+          sum + products[index].purchase_price * products[index].quantity,
+        0
+      ),
+    });
+
+    const savedInvoice = await invoice.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Invoice created successfully",
+      data: savedInvoice,
+    });
+  } catch (error) {
+    console.error("Error creating invoice:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while creating invoice",
+    });
+  }
+};

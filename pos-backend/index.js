@@ -3,6 +3,7 @@ import cors from 'cors'
 import authRouter from './routes/auth.js'
 import metaDataRouter from './routes/metaData.js'
 import productRouter from './routes/product.js'
+import invoiceRouter from './routes/invoice.js'
 import dotenv from 'dotenv';
 import connectToDatabase from './db/db.js';
 
@@ -14,6 +15,7 @@ app.use(express.json())
 app.use('/api/auth',authRouter)
 app.use('/api/meta-data',metaDataRouter)
 app.use('/api/product',productRouter)
+app.use('/api/invoice',invoiceRouter)
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is Running on port ${process.env.PORT}`)
