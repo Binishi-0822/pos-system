@@ -1,7 +1,7 @@
 import { DataGrid, GridOverlay } from "@mui/x-data-grid";
 import Paper from "@mui/material/Paper";
 
-const DataGridTable = ({ columns, rows, isSearch }) => {
+const DataGridTable = ({ columns, rows, isSearch=""}) => {
   const paginationModel = { page: 0, pageSize: 5 };
 
   // Custom overlay for empty rows

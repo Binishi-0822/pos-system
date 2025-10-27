@@ -9,6 +9,7 @@ import DashboardOverview from './pages/DashboardOverview/DashboardOverview'
 import InventoryManagement from './pages/InventoryManagement'
 import ManageSupplierInvoices from './pages/ManageSupplierInvoices'
 import CreateNewInvoice from './pages/CreateNewInvoice'
+import ViewInvoice from './pages/ViewInvoice'
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/admin-dashboard/inventory-management" element={<InventoryManagement/>}></Route>
           <Route path="/admin-dashboard/manage-supplier-invoices" element={<ManageSupplierInvoices/>}></Route>
           <Route path="/admin-dashboard/create-new-invoice" element={<CreateNewInvoice/>}></Route>
+          <Route path="/admin-dashboard/view-invoice" element={<ViewInvoice/>}></Route>
         </Route>
         <Route path="/cashier-dashboard" element={<CashierDashboard/>}></Route>
       </Routes>

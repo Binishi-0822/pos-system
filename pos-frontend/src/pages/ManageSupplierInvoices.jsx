@@ -28,30 +28,36 @@ const ManageSupplierInvoices = () => {
       headerAlign: "center",
       align: "center",
       renderCell: (params) => (
-        <div className="flex justify-center items-center gap-2">
-          <button
-            className="text-blue-600 hover:text-blue-700 transition"
-            title="View Batches"
-            onClick={() => handleViewBatches(params.row)}
-          >
+        <div className="flex items-center justify-center h-full gap-2">
+            <button
+                className="text-blue-600 hover:text-blue-700 transition"
+                title="View Batches"
+                onClick={() =>
+                    navigate("/admin-dashboard/view-invoice", {
+                        state: { invoice: params.row },
+                    })
+                }
+
+            >
             <Eye size={18} />
-          </button>
-          <button
-            className="text-green-600 hover:text-green-700 transition"
-            title="Edit Invoice"
-            onClick={() => handleEdit(params.row)}
-          >
+            </button>
+            <button
+                className="text-green-600 hover:text-green-700 transition"
+                title="Edit Invoice"
+                onClick={() => handleEdit(params.row)}
+            >
             <Edit size={18} />
-          </button>
-          <button
-            className="text-red-600 hover:text-red-700 transition"
-            title="Delete Invoice"
-            onClick={() => handleDelete(params.row)}
-          >
+            </button>
+            <button
+                className="text-red-600 hover:text-red-700 transition"
+                title="Delete Invoice"
+                onClick={() => handleDelete(params.row)}
+            >
             <Trash2 size={18} />
-          </button>
+            </button>
         </div>
-      ),
+        ),
+
     },
   ];
 
