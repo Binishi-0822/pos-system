@@ -9,9 +9,7 @@ const invoiceSchema = new mongoose.Schema(
     // Each item in the invoice points to a batch
     items: [
       {
-        batch_id: { type: mongoose.Schema.Types.ObjectId, ref: "Batch", required: true },
-        // quantity: { type: Number, required: true }, // how much sold from this batch
-        // subtotal: { type: Number, required: true }, // purchase_price * quantity or selling_price * quantity
+        batch_id: { type: mongoose.Schema.Types.ObjectId, ref: "ProductBatch", required: true },
       }
     ],
 
