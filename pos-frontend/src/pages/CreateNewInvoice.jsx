@@ -7,18 +7,20 @@ import {
   Package,
   Save,
   Plus,
+  Eye,
+  Edit,
+  Trash2,
 } from "lucide-react";
-import { Formik, Form, Field } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import { useNavigate } from "react-router-dom";
 import AddProductModal from "../components/inventoryManagement/AddProductModal";
 import AddProductBatchModal from "../components/inventoryManagement/AddProductBatchModal";
 import { getProducts } from "../services/productService";
 import AlertBox from "../components/inventoryManagement/AlertBox";
 import DataGridTable from "../components/DataGridTable";
-import { Eye, Edit, Trash2 } from "lucide-react";
 import { addInvoice } from "../services/invoiceService";
 import Alert from "@mui/material/Alert";
-
+import { addInvoiceValidationSchema } from "../validation/addInvoiceValidation";
 
 const CreateNewInvoice = () => {
   const navigate = useNavigate();
@@ -45,17 +47,13 @@ const CreateNewInvoice = () => {
     severity: "",
   });
 
-
-   const columns = [
+  const columns = [
     {
       field: "product",
       headerName: "Product",
       flex: 1,
       renderCell: (params) => (
-        <div
-          className="truncate max-w-[200px]"
-          title={params.value}
-        >
+        <div className="truncate max-w-[200px]" title={params.value}>
           {params.value}
         </div>
       ),
@@ -74,21 +72,21 @@ const CreateNewInvoice = () => {
       renderCell: (params) => (
         <div className="flex justify-center items-center gap-1 h-full">
           <button
-            className="text-blue-600 p-1 hover:text-blue-700 transition duration-200"
+            className="text-blue-600 p-1 hover:text-blue-700"
             title="View Batches"
             onClick={() => handleViewBatches(params.row)}
           >
             <Eye size={18} />
           </button>
           <button
-            className="text-green-600  p-1 hover:text-green-700 transition duration-200"
+            className="text-green-600 p-1 hover:text-green-700"
             title="Edit Product"
             onClick={() => handleEdit(params.row)}
           >
             <Edit size={18} />
           </button>
           <button
-            className="text-red-600 p-1 hover:text-red-700 transition duration-200"
+            className="text-red-600 p-1 hover:text-red-700"
             title="Delete Product"
             onClick={() => handleDelete(params.row)}
           >
@@ -119,6 +117,15 @@ const CreateNewInvoice = () => {
   };
 
   const handleSubmit = async (values, { resetForm }) => {
+    if (invoiceProductList.length === 0) {
+      setAlert({
+        show: true,
+        message: "Please add at least one product before saving the invoice.",
+        severity: "error",
+      });
+      return;
+    }
+
     try {
       const invoiceData = {
         supplier_name: values.supplier_name,
@@ -146,16 +153,12 @@ const CreateNewInvoice = () => {
           severity: "success",
         });
 
-        // Clear form + product list + reset search
         resetForm();
         setInvoiceProductList([]);
         setSearchTerm("");
         setSelectedProduct(null);
-
-        // Optional: Reload products
         handleReload();
 
-        // Auto-hide alert after a few seconds
         setTimeout(() => {
           setAlert({ show: false, message: "", severity: "" });
         }, 3000);
@@ -175,8 +178,6 @@ const CreateNewInvoice = () => {
       });
     }
   };
-
-
 
   // Fetch products
   useEffect(() => {
@@ -211,11 +212,9 @@ const CreateNewInvoice = () => {
         setProducts([]);
       }
     };
-
     fetchProducts();
   }, [reload]);
 
-  // Filter products
   const filteredProducts = useMemo(() => {
     return products.filter((p) =>
       p.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -245,13 +244,11 @@ const CreateNewInvoice = () => {
 
   const handleReload = () => setReload((prev) => !prev);
 
-  // Calculate totals
   const totalAmount = invoiceProductList.reduce(
     (sum, item) => sum + Number(item.subtotal || 0),
     0
   );
   const totalItems = invoiceProductList.length;
-
   const isModalOpen = showAddProductModal || showAddBatchModal;
 
   return (
@@ -259,7 +256,7 @@ const CreateNewInvoice = () => {
       <div className="px-6 mt-6">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center text-blue-600 hover:text-blue-800 mb-2 transition-colors duration-200"
+          className="flex items-center text-blue-600 hover:text-blue-800 mb-2"
         >
           <ArrowLeft size={18} className="mr-1" />
           Back to Invoices
@@ -277,18 +274,22 @@ const CreateNewInvoice = () => {
       </div>
 
       <div className="px-6 mt-6">
-        <Formik initialValues={initialValues} onSubmit={handleSubmit}>
+        <Formik
+          initialValues={{ ...initialValues, products: invoiceProductList }}
+          onSubmit={handleSubmit}
+          validationSchema={addInvoiceValidationSchema}
+        >
           {() => (
             <Form>
               {/* Invoice Information */}
               <div className="rounded-lg bg-white border shadow-md p-5 w-full">
-                <div className="mb-4">
-                  <div className="flex items-center gap-2 text-base font-semibold text-slate-800 tracking-wide">
-                    <span className="text-blue-500 text-xl">👤</span>
-                    Invoice Information
-                  </div>
+                <div className="mb-4 flex items-center gap-2 text-base font-semibold text-slate-800">
+                  <span className="text-blue-500 text-xl">👤</span>
+                  Invoice Information
                 </div>
+
                 <div className="grid grid-cols-3 gap-4">
+                  {/* Supplier Name */}
                   <div>
                     <label className="block text-sm font-medium text-gray-600">
                       Supplier Name <span className="text-red-500">*</span>
@@ -297,10 +298,16 @@ const CreateNewInvoice = () => {
                       type="text"
                       name="supplier_name"
                       placeholder="Enter supplier name"
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-100 focus:outline-none"
+                    />
+                    <ErrorMessage
+                      name="supplier_name"
+                      component="div"
+                      className="text-red-600 text-sm mt-1"
                     />
                   </div>
 
+                  {/* Invoice Number */}
                   <div>
                     <label className="block text-sm font-medium text-gray-600">
                       Invoice Number
@@ -309,10 +316,11 @@ const CreateNewInvoice = () => {
                       type="text"
                       name="invoice_number"
                       placeholder="Optional"
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-100 focus:outline-none"
                     />
                   </div>
 
+                  {/* Invoice Date */}
                   <div>
                     <label className="block text-sm font-medium text-gray-600">
                       Invoice Date <span className="text-red-500">*</span>
@@ -320,7 +328,12 @@ const CreateNewInvoice = () => {
                     <Field
                       type="date"
                       name="invoice_date"
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-100 focus:outline-none"
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md focus:ring focus:ring-blue-100 focus:outline-none"
+                    />
+                    <ErrorMessage
+                      name="invoice_date"
+                      component="div"
+                      className="text-red-600 text-sm mt-1"
                     />
                   </div>
                 </div>
@@ -329,7 +342,7 @@ const CreateNewInvoice = () => {
               {/* Add Products */}
               <div className="rounded-lg bg-white border shadow-md p-5 w-full mt-6">
                 <div className="flex flex-col gap-2 mb-4">
-                  <div className="flex items-center gap-2 text-base font-semibold text-slate-800 tracking-wide">
+                  <div className="flex items-center gap-2 text-base font-semibold text-slate-800">
                     <PackageSearch className="text-blue-500 w-5 h-5" />
                     Add Products
                   </div>
@@ -421,7 +434,7 @@ const CreateNewInvoice = () => {
                 )}
               </div>
 
-              {/* Invoice Product Table */}
+              {/* Product Table */}
               {invoiceProductList.length > 0 && (
                 <div className="mt-6 rounded-lg bg-white border shadow-md p-5 w-full">
                   <h3 className="text-lg font-semibold mb-3">
@@ -492,7 +505,6 @@ const CreateNewInvoice = () => {
             setSearchTerm("");
           }}
           onAddBatch={(product, batchData) => {
-            console.log("product : ",product)
             const updatedItem = {
               id: product.id || Date.now(),
               _id: product._id,
@@ -506,8 +518,9 @@ const CreateNewInvoice = () => {
             };
 
             setInvoiceProductList((prev) => {
-              // if editing, replace; if adding, append
-              const existingIndex = prev.findIndex((item) => item.id === product.id);
+              const existingIndex = prev.findIndex(
+                (item) => item.id === product.id
+              );
               if (existingIndex !== -1) {
                 const updatedList = [...prev];
                 updatedList[existingIndex] = updatedItem;
