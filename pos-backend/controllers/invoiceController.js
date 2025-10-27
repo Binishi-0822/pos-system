@@ -66,8 +66,16 @@ export const getAllInvoices = async (req, res) => {
     const invoices = await Invoice.find()
       .populate({
         path: "items.batch_id",
-        model: ProductBatch,
-        populate: { path: "product_id", model: Product },
+        model: "ProductBatch",
+        populate: {
+          path: "product_id",
+          model: "Product",
+          populate: { 
+            path: "categoryId", 
+            model: "ProductCategory",
+            select: "name"
+          }
+        },
       })
       .sort({ createdAt: -1 });
 

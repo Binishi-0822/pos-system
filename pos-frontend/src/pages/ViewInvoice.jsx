@@ -53,7 +53,7 @@ const ViewInvoice = () => {
   const rowData = invoice.items.map((item, index) => ({
     id: item._id || index,
     product: item.batch_id?.product_id?.name || "N/A",
-    category: item.batch_id?.product_id?.categoryId || "N/A",
+    category: item.batch_id?.product_id?.categoryId?.name || "N/A",
     batch_id: item.batch_id?._id || "N/A",
     quantity: item.batch_id?.quantity || 0,
     purchase_price: item.batch_id?.purchase_price || 0,
@@ -61,7 +61,7 @@ const ViewInvoice = () => {
     expire_date: item.batch_id?.expire_date
       ? new Date(item.batch_id.expire_date).toLocaleDateString("en-GB")
       : "N/A",
-    subtotal: ((item.purchase_price || 0) * (item.quantity || 0)).toFixed(2),
+    subtotal: ((item.batch_id?.purchase_price || 0) * (item.batch_id?.quantity || 0)).toFixed(2),
   }));
 
   return (
