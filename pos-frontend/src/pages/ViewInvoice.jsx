@@ -112,9 +112,7 @@ const ViewInvoice = () => {
             <div>
               <p className="text-sm text-gray-500">Invoice Date</p>
               <p className="font-medium">
-                {invoice.invoice_date
-                  ? new Date(invoice.invoice_date).toLocaleDateString("en-GB")
-                  : "N/A"}
+                {invoice.invoice_date}
               </p>
             </div>
           </div>

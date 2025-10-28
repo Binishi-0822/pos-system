@@ -17,6 +17,13 @@ export const createInvoice = async (req, res) => {
     //  Create and save product batches first
     const savedBatches = await Promise.all(
       products.map(async (p) => {
+        const product = await Product.findById(p.product_id);
+        if (!product) throw new Error("Product not found");
+
+        // Increment stock
+        product.totalStock = product.totalStock + p.quantity;
+        await product.save(); 
+        
         const newBatch = new ProductBatch({
           product_id: p.product_id,
           purchase_price: p.purchase_price,

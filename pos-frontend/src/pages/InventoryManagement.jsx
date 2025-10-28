@@ -32,6 +32,7 @@ const InventoryManagement = () => {
     { field: "brand", headerName: "Brand Name", flex: 1 },
     { field: "category", headerName: "Category", flex: 1 },
     { field: "minStock", headerName: "Min Stock", flex: 1 },
+    { field: "totalStock", headerName: "Total Stock", flex: 1 },
     {
       field: "status",
       headerName: "Status",
@@ -133,6 +134,7 @@ const InventoryManagement = () => {
             unit: item.unitId?.name || "",
             unitId: item.unitId?._id || "",
             minimumStock: item.minStock,
+            totalStock: item.totalStock || 0,
             unitSymbol: item.unitId?.symbol || "",
             minStock: `${item.minStock} ${item.unitId?.symbol || ""}`,
             status:
