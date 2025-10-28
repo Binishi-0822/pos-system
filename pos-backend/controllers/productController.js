@@ -1,6 +1,7 @@
 import Product from "../models/Product.js";
 import ProductCategory from "../models/ProductCategory.js";
 import Measurement from "../models/Measurement.js";
+import ProductBatch from "../models/ProductBatch.js";
 
 export const addProduct = async (req, res) => {
   try {
@@ -31,7 +32,9 @@ export const addProduct = async (req, res) => {
     });
 
     await newProduct.save();
-    res.status(201).json({ message: "Product added successfully", product: newProduct });
+    res
+      .status(201)
+      .json({ message: "Product added successfully", product: newProduct });
   } catch (error) {
     console.error("Error adding product:", error);
     res.status(500).json({ message: "Server error", error });
@@ -43,7 +46,9 @@ export const updateProduct = async (req, res) => {
     const { _id, name, brand, category, unit, minStock } = req.body;
 
     if (!_id) {
-      return res.status(400).json({ success: false, message: "Product ID is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Product ID is required" });
     }
 
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -53,7 +58,9 @@ export const updateProduct = async (req, res) => {
     );
 
     if (!updatedProduct) {
-      return res.status(404).json({ success: false, message: "Product not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
     }
 
     return res.status(200).json({ success: true, product: updatedProduct });
@@ -68,7 +75,7 @@ export const getAllProducts = async (req, res) => {
     const products = await Product.find()
       .populate("categoryId", "name")
       .populate("unitId", "symbol")
-      .sort({ createdAt: -1 }); 
+      .sort({ createdAt: -1 });
 
     if (!products || products.length === 0) {
       return res.status(404).json({ message: "No products found" });
@@ -90,18 +97,71 @@ export const deleteProduct = async (req, res) => {
     const { id } = req.body;
 
     if (!id) {
-      return res.status(400).json({ success: false, message: "Product ID is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Product ID is required" });
     }
 
     const deletedProduct = await Product.findByIdAndDelete(id);
 
     if (!deletedProduct) {
-      return res.status(404).json({ success: false, message: "Product not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
     }
 
-    return res.status(200).json({ success: true, message: "Product deleted successfully" });
+    return res
+      .status(200)
+      .json({ success: true, message: "Product deleted successfully" });
   } catch (error) {
     console.error("Error deleting product:", error);
-    return res.status(500).json({ success: false, message: "Server error", error });
+    return res
+      .status(500)
+      .json({ success: false, message: "Server error", error });
+  }
+};
+
+export const getInventorySummary = async (req, res) => {
+  try {
+    const stockSummary = await Product.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalStock: { $sum: "$totalStock" },
+          totalProducts: { $sum: 1 },
+          lowStockCount: {
+            $sum: { $cond: [{ $eq: ["$status", "low_stock"] }, 1, 0] },
+          },
+          inStockCount: {
+            $sum: { $cond: [{ $eq: ["$status", "in_stock"] }, 1, 0] },
+          },
+          outOfStockCount: {
+            $sum: { $cond: [{ $eq: ["$status", "out_of_stock"] }, 1, 0] },
+          },
+        },
+      },
+    ]);
+
+    const totalBatches = await ProductBatch.countDocuments();
+
+    const summaryData = stockSummary[0] || {
+      totalStock: 0,
+      totalProducts: 0,
+      lowStockCount: 0,
+      inStockCount: 0,
+      outOfStockCount: 0,
+    };
+
+    summaryData.totalBatches = totalBatches;
+
+    res.status(200).json({
+      success: true,
+      data: summaryData,
+    });
+  } catch (error) {
+    console.error("Error fetching inventory summary:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch inventory summary" });
   }
 };

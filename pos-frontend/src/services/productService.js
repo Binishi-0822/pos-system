@@ -43,3 +43,12 @@ export const getProducts = async () => {
   }
 };
 
+export const getInventorySummary = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/get-inventory-summary`);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding product:", error);
+    throw error;
+  }
+};
