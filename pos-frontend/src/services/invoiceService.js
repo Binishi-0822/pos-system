@@ -21,3 +21,13 @@ export const getAllInvoices = async () => {
     throw error;
   }
 };
+
+export const updateInvoice = async (id, invoiceData) => {
+  try {
+    const response = await axios.put(`${API_URL}/invoices/${id}`, invoiceData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating invoice:", error);
+    return { success: false, message: error.message };
+  }
+};
