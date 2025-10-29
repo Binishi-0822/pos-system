@@ -10,13 +10,31 @@ const AddProductBatchModal = ({
   isViewMode = false,
   isEditMode = false,
 }) => {
-  console.log("product : ",product)
+  console.log("product : ", product);
+
+   const formatDateForInput = (dateString) => {
+    // If already in YYYY-MM-DD, return as is
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return dateString;
+
+    // If in DD/MM/YYYY, convert
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+      const [day, month, year] = dateString.split("/");
+      return `${year}-${month}-${day}`;
+    }
+
+    // Otherwise, try to parse it
+    const parsed = new Date(dateString);
+    return !isNaN(parsed) ? parsed.toISOString().split("T")[0] : "";
+  };
+
   const initialValues = {
     productName: product.name ? product.name : product.product,
     purchasePrice: product.purchase_price || "",
     sellingPrice: product.selling_price || "",
     quantity: product.quantity || "",
-    expiryDate: product.expire_date || "",
+    expiryDate: product.expire_date
+      ? formatDateForInput(product.expire_date)
+      : "",
   };
 
   const validationSchema = Yup.object({
@@ -29,14 +47,31 @@ const AddProductBatchModal = ({
     quantity: Yup.number()
       .required("Quantity is required")
       .min(1, "Quantity must be at least 1"),
-    expiryDate: Yup.date().required("Expiry date is required"),
+    expiryDate: Yup.date()
+      .transform((value, originalValue) => {
+        if (!originalValue) return null;
+
+        // If already a Date object, keep it
+        if (Object.prototype.toString.call(originalValue) === "[object Date]")
+          return originalValue;
+
+        // Convert DD/MM/YYYY -> YYYY-MM-DD
+        const parts = originalValue.split("/");
+        if (parts.length === 3) {
+          const [day, month, year] = parts;
+          return new Date(`${year}-${month}-${day}`);
+        }
+
+        // fallback
+        return new Date(originalValue);
+      })
+      .required("Expiry date is required"),
   });
 
   const handleSubmit = (values, { resetForm }) => {
     try {
       onAddBatch(product, values);
       resetForm();
-      onClose();
     } catch (error) {
       console.error("Error adding batch:", error);
     }
@@ -53,14 +88,12 @@ const AddProductBatchModal = ({
         </button>
 
         <h2 className="text-xl font-semibold mb-4 text-gray-800">
-          {isViewMode
-            ? "View Batch"
-            : isEditMode
-            ? "Edit Batch"
-            : "Add Batch"}{" "}
-          for <span className="text-blue-600">{product.name ? product.name : product.product}</span>
+          {isViewMode ? "View Batch" : isEditMode ? "Edit Batch" : "Add Batch"}{" "}
+          for{" "}
+          <span className="text-blue-600">
+            {product.name ? product.name : product.product}
+          </span>
         </h2>
-
 
         <Formik
           initialValues={initialValues}
@@ -179,7 +212,7 @@ const AddProductBatchModal = ({
                     disabled={isSubmitting}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
                   >
-                    {isEditMode ? "Save Changes" : "Add Batch"} 
+                    {isEditMode ? "Save Changes" : "Add Batch"}
                   </button>
                 )}
               </div>

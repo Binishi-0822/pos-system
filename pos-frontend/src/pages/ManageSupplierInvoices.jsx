@@ -37,23 +37,19 @@ const ManageSupplierInvoices = () => {
                         state: { invoice: params.row },
                     })
                 }
-
             >
             <Eye size={18} />
             </button>
             <button
                 className="text-green-600 hover:text-green-700 transition"
                 title="Edit Invoice"
-                onClick={() => handleEdit(params.row)}
+                onClick={() =>
+                    navigate("/admin-dashboard/create-new-invoice", {
+                        state: { invoice: params.row },
+                    })
+                }
             >
-            <Edit size={18} />
-            </button>
-            <button
-                className="text-red-600 hover:text-red-700 transition"
-                title="Delete Invoice"
-                onClick={() => handleDelete(params.row)}
-            >
-            <Trash2 size={18} />
+             <Edit size={18} />
             </button>
         </div>
         ),

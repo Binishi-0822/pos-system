@@ -12,23 +12,40 @@ import {
   Trash2,
 } from "lucide-react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import AddProductModal from "../components/inventoryManagement/AddProductModal";
 import AddProductBatchModal from "../components/inventoryManagement/AddProductBatchModal";
 import { getProducts } from "../services/productService";
 import AlertBox from "../components/inventoryManagement/AlertBox";
 import DataGridTable from "../components/DataGridTable";
-import { addInvoice } from "../services/invoiceService";
+import { addInvoice, updateInvoice } from "../services/invoiceService";
 import Alert from "@mui/material/Alert";
 import { addInvoiceValidationSchema } from "../validation/addInvoiceValidation";
 
 const CreateNewInvoice = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const existingInvoice = location.state?.invoice || null;
+  console.log("existingInvoice : ",existingInvoice)
 
   const initialValues = {
-    supplier_name: "",
-    invoice_number: "",
-    invoice_date: new Date().toISOString().split("T")[0],
+    supplier_name: existingInvoice?.supplier_name || "",
+    invoice_number: existingInvoice?.invoice_number ||  "",
+    invoice_date: existingInvoice?.invoice_date
+      ? (() => {
+          const parts = existingInvoice.invoice_date.split("/");
+          if (parts.length === 3) {
+            const [day, month, year] = parts;
+            return `${year}-${month}-${day}`; // Convert to yyyy-MM-dd
+          }
+          // fallback for ISO date
+          return new Date(existingInvoice.invoice_date)
+            .toISOString()
+            .split("T")[0];
+        })()
+      : new Date().toISOString().split("T")[0],
+
+
   };
 
   const [showAddProductModal, setShowAddProductModal] = useState(false);
@@ -46,6 +63,7 @@ const CreateNewInvoice = () => {
     message: "",
     severity: "",
   });
+  const isEditing = Boolean(existingInvoice?._id);
 
   const columns = [
     {
@@ -97,6 +115,32 @@ const CreateNewInvoice = () => {
     },
   ];
 
+  useEffect(() => {
+    if (existingInvoice?.items?.length > 0) {
+      console.log("item ",existingInvoice?.items);
+
+      const formattedItems = existingInvoice.items.map((item, index) => ({
+        id: index + 1,
+        _id: item.batch_id?.product_id?._id,
+        product: item.batch_id?.product_id?.name || "N/A",
+        category: item.batch_id?.product_id?.categoryId?.name || "N/A",
+        purchase_price: item.batch_id?.purchase_price || 0,
+        selling_price: item.batch_id?.selling_price || 0,
+        quantity: item.batch_id?.quantity || 0,
+        expire_date: item.batch_id?.expire_date
+          ? new Date(item.batch_id.expire_date).toLocaleDateString("en-GB")
+          : "N/A",
+        subtotal:
+          (item.batch_id?.purchase_price || 0) *
+          (item.batch_id?.quantity || 0),
+      }));
+
+
+      setInvoiceProductList(formattedItems);
+    }
+  }, [existingInvoice]);
+
+
   const handleDelete = (row) => {
     setInvoiceProductList((prevList) =>
       prevList.filter((item) => item.id !== row.id)
@@ -144,7 +188,10 @@ const CreateNewInvoice = () => {
 
       console.log("Invoice Data:", invoiceData);
 
-      const result = await addInvoice(invoiceData);
+      const result = isEditing
+        ? await updateInvoice(existingInvoice._id, invoiceData)
+        : await addInvoice(invoiceData);
+
 
       if (result?.success) {
         setAlert({
@@ -161,6 +208,7 @@ const CreateNewInvoice = () => {
 
         setTimeout(() => {
           setAlert({ show: false, message: "", severity: "" });
+          navigate("/admin-dashboard/manage-supplier-invoices");
         }, 3000);
       } else {
         setAlert({
@@ -277,7 +325,7 @@ const CreateNewInvoice = () => {
         <Formik
           initialValues={{ ...initialValues, products: invoiceProductList }}
           onSubmit={handleSubmit}
-          validationSchema={addInvoiceValidationSchema}
+          // validationSchema={addInvoiceValidationSchema}
         >
           {() => (
             <Form>
