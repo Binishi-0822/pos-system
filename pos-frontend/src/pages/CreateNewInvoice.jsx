@@ -90,6 +90,7 @@ const CreateNewInvoice = () => {
       renderCell: (params) => (
         <div className="flex justify-center items-center gap-1 h-full">
           <button
+            type="button"
             className="text-blue-600 p-1 hover:text-blue-700"
             title="View Batches"
             onClick={() => handleViewBatches(params.row)}
@@ -97,6 +98,7 @@ const CreateNewInvoice = () => {
             <Eye size={18} />
           </button>
           <button
+            type="button"
             className="text-green-600 p-1 hover:text-green-700"
             title="Edit Product"
             onClick={() => handleEdit(params.row)}
@@ -104,6 +106,7 @@ const CreateNewInvoice = () => {
             <Edit size={18} />
           </button>
           <button
+            type="button"
             className="text-red-600 p-1 hover:text-red-700"
             title="Delete Product"
             onClick={() => handleDelete(params.row)}
