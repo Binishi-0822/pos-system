@@ -4,6 +4,7 @@ import { IoPersonAddSharp } from "react-icons/io5";
 import { AiOutlineTransaction } from "react-icons/ai";
 import { BiSolidReport } from "react-icons/bi";
 import { FaFileInvoiceDollar } from "react-icons/fa";
+import { IoPeopleSharp } from "react-icons/io5"
 
 
 export const sideBarOptions = {
@@ -38,8 +39,11 @@ export const sideBarOptions = {
             path: "/admin-dashboard"
         },
 
-
-
+        {
+            icon: IoPeopleSharp,
+            title: "Customer Management",
+            path: "/admin-dashboard/customer-management"
+        }
 
         
     ],
