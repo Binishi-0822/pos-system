@@ -10,6 +10,7 @@ import InventoryManagement from './pages/InventoryManagement'
 import ManageSupplierInvoices from './pages/ManageSupplierInvoices'
 import CreateNewInvoice from './pages/CreateNewInvoice'
 import ViewInvoice from './pages/ViewInvoice'
+import CustomerManagement from './pages/CustomerManagement'
 
 function App() {
   return (
@@ -30,6 +31,8 @@ function App() {
           <Route path="/admin-dashboard/manage-supplier-invoices" element={<ManageSupplierInvoices/>}></Route>
           <Route path="/admin-dashboard/create-new-invoice" element={<CreateNewInvoice/>}></Route>
           <Route path="/admin-dashboard/view-invoice" element={<ViewInvoice/>}></Route>
+          <Route path="/admin-dashboard/customer-management" element={<CustomerManagement/>}></Route>
+
         </Route>
         <Route path="/cashier-dashboard" element={<CashierDashboard/>}></Route>
       </Routes>

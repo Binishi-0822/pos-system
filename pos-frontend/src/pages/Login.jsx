@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import {useAuth} from '../context/AuthContext'
+import {loginService} from '../services/authService'
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -13,10 +14,7 @@ const Login = () => {
   const handleSubmit = async(e) => {
     e.preventDefault()
     try{
-      const response = await axios.post(
-        "http://localhost:3000/api/auth/login",
-        {email, password}
-      );
+      const response = await loginService(email,password)
       if(response.data.success){
         login(response.data.user)
         localStorage.setItem("token", response.data.token)
@@ -49,7 +47,7 @@ const Login = () => {
         </div>
 
         <div>
-          <label htmlFor='password'>Password</label>
+          <label htmlFor='password'>password</label>
           <input 
             type="password" 
             placeholder='*******'
