@@ -1,6 +1,5 @@
 import React,{useEffect,useState} from "react";
-import { Package, Boxes, AlertTriangle, Layers } from "lucide-react";
-import { getInventorySummary } from "../../services/productService";
+import { Users, Wallet, AlertTriangle, UserX } from "lucide-react";
 
 const CustomerManagementOverview = () => {
   
@@ -65,4 +64,4 @@ const cardData = [
   );
 };
 
-export default InventoryManagementOverview;
+export default CustomerManagementOverview;
