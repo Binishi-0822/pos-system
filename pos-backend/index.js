@@ -20,7 +20,7 @@ app.use('/api/auth',authRouter)
 app.use('/api/meta-data',metaDataRouter)
 app.use('/api/product',productRouter)
 app.use('/api/invoice',invoiceRouter)
-app.use('api/customer',customerRouter)
+app.use('/api/customer',customerRouter)
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is Running on port ${process.env.PORT}`)
