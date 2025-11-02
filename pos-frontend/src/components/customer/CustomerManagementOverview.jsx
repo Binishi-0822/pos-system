@@ -54,7 +54,7 @@ const CustomerManagementOverview = () => {
               <div className="flex-shrink-0 ml-3">{card.icon}</div>
             </div>
             <p
-              className={`text-xs sm:text-sm md:text-base font-medium ${card.subtitleColor}`}
+              className={`text-xs sm:text-sm md:text-sm ${card.subtitleColor}`}
             >
               {card.subtitle}
             </p>
