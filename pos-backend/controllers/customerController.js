@@ -1,4 +1,6 @@
 import Customer from "../models/Customer.js";
+import { sendAccountCreationWhatsApp } from "../config/twilio.js";
+
 
 // ✅ Helper: validate basic fields
 const validateCustomer = (data) => {
@@ -22,6 +24,9 @@ export const createCustomer = async (req, res) => {
       return res.status(400).json({ success: false, message: "Customer with this phone already exists." });
 
     const customer = await Customer.create({ name, address, phone });
+    await sendAccountCreationWhatsApp(phone, name);
+
+
     res.status(201).json({ success: true, data: customer, message: "Customer created successfully" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
