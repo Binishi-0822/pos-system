@@ -56,7 +56,7 @@ export const getCustomerById = async (req, res) => {
 export const updateCustomer = async (req, res) => {
   try {
     const { name, address, phone, status } = req.body;
-
+    
     // Validate if fields are provided
     if (name || address || phone) {
       const error = validateCustomer({ name: name || "xx", address: address || "xxxxx", phone: phone || "0000000000" });
@@ -64,7 +64,7 @@ export const updateCustomer = async (req, res) => {
     }
 
     const customer = await Customer.findByIdAndUpdate(
-      req.params.id,
+      req.body._id,
       { name, address, phone, status, lastActiveAt: Date.now() },
       { new: true, runValidators: true }
     );
