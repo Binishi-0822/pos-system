@@ -5,7 +5,7 @@ import { AiOutlineTransaction } from "react-icons/ai";
 import { BiSolidReport } from "react-icons/bi";
 import { FaFileInvoiceDollar } from "react-icons/fa";
 import { IoPeopleSharp } from "react-icons/io5"
-
+import { IoReceiptSharp } from "react-icons/io5";
 
 export const sideBarOptions = {
     owner : [
@@ -14,7 +14,11 @@ export const sideBarOptions = {
             title: "Dashboard",
             path: "/admin-dashboard"
         },
-
+        {
+            icon: IoReceiptSharp,
+            title: "New Sale",
+            path: "/admin-dashboard/billing"
+        },
         {
             icon: MdInventory,
             title: "Inventory Management",
@@ -43,9 +47,8 @@ export const sideBarOptions = {
             icon: IoPeopleSharp,
             title: "Customer Management",
             path: "/admin-dashboard/customer-management"
-        }
-
-        
+        },
+      
     ],
 
     cashier : [
