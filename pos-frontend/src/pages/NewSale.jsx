@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import SectionTitle from "../components/SectionTitle";
 import { IoCameraSharp } from "react-icons/io5";
 import { CiBarcode } from "react-icons/ci";
-import { getCategories, getMeasurements } from "../../services/metaService";
+import { getCategories } from "../services/metaService";
 
 const NewSale = () => {
   const [searchTerm, setSearchTerm] = useState("");
