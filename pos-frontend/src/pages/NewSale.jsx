@@ -6,19 +6,19 @@ import { getCategories } from "../services/metaService";
 
 const NewSale = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [categories,setCategories] = useState([])
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   useEffect(() => {
     const fetchCategories = async () => {
       const response = await getCategories();
       if (response.success) {
-        setCategories(response.data);
+        const categoryNames = response.data.map((category) => category.name);
+        setCategories(["All", ...categoryNames]);
       } else {
-        setCategories([]);
+        setCategories(["All"]);
       }
     };
-
-    
     fetchCategories();
   }, []);
 
@@ -65,6 +65,28 @@ const NewSale = () => {
               Press Enter ↵
             </p>
           </div>
+
+          {/* Horizontally Scrollable Categories */}
+          <div className="col-span-2 mt-6">
+            <div
+              className="flex gap-3 overflow-x-auto no-scrollbar py-2 px-1"
+              style={{ scrollBehavior: "smooth" }}
+            >
+              {categories.map((category, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-5 py-2 rounded-full border text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                    selectedCategory === category
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-blue-50"
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Right Section - Current Sale */}
@@ -77,6 +99,17 @@ const NewSale = () => {
           </div>
         </div>
       </div>
+
+      {/* Hide Scrollbar (Tailwind Custom) */}
+      <style jsx>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </div>
   );
 };
