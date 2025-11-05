@@ -70,27 +70,27 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-export const getAllProducts = async (req, res) => {
-  try {
-    const products = await Product.find()
-      .populate("categoryId", "name")
-      .populate("unitId", "symbol")
-      .sort({ createdAt: -1 });
+// export const getAllProducts = async (req, res) => {
+//   try {
+//     const products = await Product.find()
+//       .populate("categoryId", "name")
+//       .populate("unitId", "symbol")
+//       .sort({ createdAt: -1 });
 
-    if (!products || products.length === 0) {
-      return res.status(404).json({ message: "No products found" });
-    }
+//     if (!products || products.length === 0) {
+//       return res.status(404).json({ message: "No products found" });
+//     }
 
-    res.status(200).json({
-      success: true,
-      message: "Products fetched successfully",
-      data: products,
-    });
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    res.status(500).json({ success: false, message: "Server error", error });
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       message: "Products fetched successfully",
+//       data: products,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching products:", error);
+//     res.status(500).json({ success: false, message: "Server error", error });
+//   }
+// };
 
 export const deleteProduct = async (req, res) => {
   try {
@@ -163,5 +163,47 @@ export const getInventorySummary = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Failed to fetch inventory summary" });
+  }
+};
+
+export const getProducts = async (req, res) => {
+  try {
+    const { id } = req.params; // get id from URL params
+
+    // If ID is provided → fetch single product
+    if (id) {
+      const product = await Product.findById(id)
+        .populate("categoryId", "name")
+        .populate("unitId", "symbol");
+
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Product fetched successfully",
+        data: product,
+      });
+    }
+
+    // Otherwise → fetch all products
+    const products = await Product.find()
+      .populate("categoryId", "name")
+      .populate("unitId", "symbol")
+      .sort({ createdAt: -1 });
+
+    if (!products || products.length === 0) {
+      return res.status(404).json({ message: "No products found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Products fetched successfully",
+      data: products,
+    });
+  } catch (error) {
+    console.error("Error fetching products:", error);
+    res.status(500).json({ success: false, message: "Server error", error });
   }
 };

@@ -43,6 +43,17 @@ export const getProducts = async () => {
   }
 };
 
+export const getProductsByCategory = async (id) => {
+  try {
+    const response = await axios.get(`${API_URL}/get-products/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching product with ID ${id}:`, error);
+    throw error;
+  }
+};
+
+
 export const getInventorySummary = async () => {
   try {
     const response = await axios.get(`${API_URL}/get-inventory-summary`);
