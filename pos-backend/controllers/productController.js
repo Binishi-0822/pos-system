@@ -168,26 +168,27 @@ export const getInventorySummary = async (req, res) => {
 
 export const getProducts = async (req, res) => {
   try {
-    const { id } = req.params; // get id from URL params
+    const { id } = req.params; // id here means categoryId
 
-    // If ID is provided → fetch single product
     if (id) {
-      const product = await Product.findById(id)
+      // Fetch all products for the given categoryId
+      const products = await Product.find({ categoryId: id })
         .populate("categoryId", "name")
         .populate("unitId", "symbol");
 
-      if (!product) {
-        return res.status(404).json({ message: "Product not found" });
+      if (!products || products.length === 0) {
+        return res.status(404).json({ status: "404", message: "No products found for this category" });
       }
 
       return res.status(200).json({
+        status: "200",
         success: true,
-        message: "Product fetched successfully",
-        data: product,
+        message: "Products fetched successfully",
+        data: products,
       });
     }
 
-    // Otherwise → fetch all products
+    // Fetch all products if no id is given
     const products = await Product.find()
       .populate("categoryId", "name")
       .populate("unitId", "symbol")

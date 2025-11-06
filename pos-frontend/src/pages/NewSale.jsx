@@ -4,6 +4,7 @@ import { IoCameraSharp } from "react-icons/io5";
 import { CiBarcode } from "react-icons/ci";
 import { getCategories } from "../services/metaService";
 import { getProducts, getProductsByCategory } from "../services/productService";
+import AlertBox from "../components/inventoryManagement/AlertBox";
 
 const NewSale = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -46,9 +47,14 @@ const NewSale = () => {
         response = await getProductsByCategory(categoryId);
       }
 
-      if (response.success) setProducts(response.data || []);
+      if (response.status === 404 || !response.data?.length) {
+        setProducts([]);
+      } else {
+        setProducts(response.data || []);
+      }
     } catch (error) {
       console.error("Error loading products:", error);
+      setProducts([]);
     }
   };
 
@@ -107,7 +113,7 @@ const NewSale = () => {
             </div>
           </div>
 
-          {/* Category Buttons (Horizontal Scrollable) */}
+          {/* Category Buttons */}
           <div className="flex overflow-x-auto gap-3 py-3 scrollbar-hide">
             {categories.map((category) => (
               <button
@@ -125,7 +131,7 @@ const NewSale = () => {
             ))}
           </div>
 
-          {/* ✅ Product List (Responsive + Scrollable) */}
+          {/* ✅ Product List or Alert */}
           {products.length > 0 ? (
             <div
               className="h-[65vh] overflow-y-auto pr-2 
@@ -143,12 +149,9 @@ const NewSale = () => {
                                transition-all duration-300 hover:scale-[1.02] cursor-pointer"
                   >
                     <div className="p-4 flex flex-col justify-between h-full">
-                      {/* Product Name */}
                       <h4 className="text-md font-semibold text-gray-800 truncate">
                         {product.name}
                       </h4>
-
-                      {/* Price and Stock */}
                       <div className="mt-2 flex justify-between items-center">
                         <p className="text-sm font-medium text-blue-700">
                           Rs. {product.price ? product.price.toFixed(2) : "123.00"}
@@ -163,13 +166,9 @@ const NewSale = () => {
                           {product.totalStock > 0 ? "In Stock" : "Out of Stock"}
                         </span>
                       </div>
-
-                      {/* Stock Info */}
                       <div className="mt-2 text-xs text-gray-500">
                         Min Stock: {product.minStock} | Total: {product.totalStock}
                       </div>
-
-                      {/* Add to Cart Button */}
                       <button
                         onClick={() => console.log("Add to Cart:", product.name)}
                         className="mt-4 w-full py-2 rounded-lg text-sm font-medium 
@@ -185,9 +184,11 @@ const NewSale = () => {
               </div>
             </div>
           ) : (
-            <p className="text-gray-500 text-sm text-center mt-4">
-              No products available.
-            </p>
+            <AlertBox
+              type="info"
+              title="No Products Found"
+              message="There are currently no products available in this category."
+            />
           )}
         </div>
 
