@@ -5,12 +5,14 @@ import { CiBarcode } from "react-icons/ci";
 import { getCategories } from "../services/metaService";
 import { getProducts, getProductsByCategory } from "../services/productService";
 import AlertBox from "../components/inventoryManagement/AlertBox";
+import CurrentSale from "../components/CurrentSale";
 
 const NewSale = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState("all");
   const [products, setProducts] = useState([]);
+  const [cart, setCart] = useState([]); // 🛒 cart state
 
   // ✅ Load categories
   useEffect(() => {
@@ -33,7 +35,6 @@ const NewSale = () => {
         console.error("Error fetching categories:", error);
       }
     };
-
     fetchCategories();
   }, []);
 
@@ -41,17 +42,10 @@ const NewSale = () => {
   const loadProducts = async (categoryId = "all") => {
     try {
       let response;
-      if (categoryId === "all") {
-        response = await getProducts();
-      } else {
-        response = await getProductsByCategory(categoryId);
-      }
+      if (categoryId === "all") response = await getProducts();
+      else response = await getProductsByCategory(categoryId);
 
-      if (response.status === 404 || !response.data?.length) {
-        setProducts([]);
-      } else {
-        setProducts(response.data || []);
-      }
+      setProducts(response.data || []);
     } catch (error) {
       console.error("Error loading products:", error);
       setProducts([]);
@@ -65,6 +59,35 @@ const NewSale = () => {
   useEffect(() => {
     loadProducts(activeCategory);
   }, [activeCategory]);
+
+  // ✅ Add to Cart Handler
+  const handleAddToCart = (product) => {
+    setCart((prevCart) => {
+      const existing = prevCart.find((item) => item._id === product._id);
+      if (existing) {
+        return prevCart.map((item) =>
+          item._id === product._id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prevCart, { ...product, quantity: 1 }];
+    });
+  };
+
+  // ✅ Update quantity
+  const handleUpdateQuantity = (productId, newQty) => {
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item._id === productId ? { ...item, quantity: newQty } : item
+      )
+    );
+  };
+
+  // ✅ Remove item
+  const handleRemove = (productId) => {
+    setCart((prevCart) => prevCart.filter((item) => item._id !== productId));
+  };
 
   return (
     <div className="flex-1 w-full px-0">
@@ -131,16 +154,10 @@ const NewSale = () => {
             ))}
           </div>
 
-          {/* ✅ Product List or Alert */}
+          {/* Product List */}
           {products.length > 0 ? (
-            <div
-              className="h-[65vh] overflow-y-auto pr-2 
-                         scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent"
-            >
-              <div
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 
-                           gap-6 mt-4"
-              >
+            <div className="h-[65vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
                 {products.map((product) => (
                   <div
                     key={product._id}
@@ -154,7 +171,7 @@ const NewSale = () => {
                       </h4>
                       <div className="mt-2 flex justify-between items-center">
                         <p className="text-sm font-medium text-blue-700">
-                          Rs. {product.price ? product.price.toFixed(2) : "123.00"}
+                          Rs. {product.price?.toFixed(2) ?? "10.00"}
                         </p>
                         <span
                           className={`text-xs px-2 py-1 rounded-full ${
@@ -166,15 +183,16 @@ const NewSale = () => {
                           {product.totalStock > 0 ? "In Stock" : "Out of Stock"}
                         </span>
                       </div>
-                      <div className="mt-2 text-xs text-gray-500">
-                        Min Stock: {product.minStock} | Total: {product.totalStock}
-                      </div>
                       <button
-                        onClick={() => console.log("Add to Cart:", product.name)}
-                        className="mt-4 w-full py-2 rounded-lg text-sm font-medium 
-                                   bg-blue-50 text-blue-700 border border-blue-100 
-                                   hover:bg-blue-600 hover:text-white 
-                                   hover:shadow-md transition-all duration-300"
+                        onClick={() => handleAddToCart(product)}
+                        disabled={product.totalStock <= 0}
+                        className={`mt-4 w-full py-2 rounded-lg text-sm font-medium 
+                                   ${
+                                     product.totalStock > 0
+                                       ? "bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-600 hover:text-white"
+                                       : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                   }
+                                   hover:shadow-md transition-all duration-300`}
                       >
                         Add to Cart
                       </button>
@@ -194,12 +212,11 @@ const NewSale = () => {
 
         {/* Right Section - Current Sale */}
         <div className="flex flex-col justify-start">
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-md p-5 h-[75vh]">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">
-              Current Sale
-            </h2>
-            <p className="text-sm text-gray-500">No items added yet.</p>
-          </div>
+          <CurrentSale
+            cart={cart}
+            onUpdateQuantity={handleUpdateQuantity}
+            onRemove={handleRemove}
+          />
         </div>
       </div>
     </div>
